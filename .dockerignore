@@ -1,0 +1,33 @@
+# Git
+.git
+.gitignore
+
+# Build artifacts
+build/
+*.o
+*.a
+*.so
+CMakeFiles/
+CMakeCache.txt
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# System
+.DS_Store
+Thumbs.db
+
+# Documentation (no necesaria para compilar)
+*.md
+ARQUITECTURA.txt
+DOCKER_SETUP.txt
+SECURITY.md
+
+# Docker files (no necesarios en imagen)
+Dockerfile
+docker-compose.yml
+.dockerignore

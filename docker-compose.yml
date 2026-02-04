@@ -1,0 +1,39 @@
+################################################################################
+#                PASSWORD MANAGER C++ - docker-compose.yml
+################################################################################
+
+services:
+  # Servicio principal de desarrollo
+  app:
+    # Construcción de la imagen
+    build:
+      context: .                 # Ruta del Dockerfile
+      dockerfile: Dockerfile
+
+    # Nombre y etiqueta de la imagen
+    image: password-manager:dev
+    container_name: password-manager-dev
+
+    # Volúmenes montados (sincronización en tiempo real)
+    volumes:
+      - .:/app                   # Código fuente completo (sincronización bidireccional)
+      - ./build:/app/build       # Build artifacts (accesible en local)
+
+    # Directorio de trabajo dentro del contenedor
+    working_dir: /app
+
+    # Variables de entorno
+    environment:
+      - CMAKE_BUILD_TYPE=Debug
+      - QT_QPA_PLATFORM=offscreen  # Sin interfaz gráfica
+
+    # Modo interactivo (permite usar terminal)
+    stdin_open: true
+    tty: true
+
+    # Comando por defecto
+    command: /bin/bash
+
+# Volúmenes persistentes
+# (Removido - usando bind mount directo de ./build)
+
