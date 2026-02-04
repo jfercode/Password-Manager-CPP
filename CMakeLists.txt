@@ -81,10 +81,12 @@ set(CORE_HEADERS
 # --- UI Module (Interfaz gráfica Qt5) ---
 set(UI_SOURCES
     # src/ui/.cpp
+    src/ui/MainWindow.cpp
 )
 
 set(UI_HEADERS
     # include/ui/.h
+    include/MainWindow.hpp
 )
 
 # --- Qt Designer UI Files ---
