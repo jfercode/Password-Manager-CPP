@@ -4,9 +4,12 @@
  * Default constuctor that initializate QMainWindow with 
  * custom functionality
  */
-MainWindow::MainWindow(QWidget *parent = null) : QMainWindow(parent)
+MainWindow::MainWindow(void)
 {
     // Inicialization code here
     std::cout << "Initilizating UI..." << std::endl;
+    m_window.show();
+    
 }
 
+MainWindow::~MainWindow() {}

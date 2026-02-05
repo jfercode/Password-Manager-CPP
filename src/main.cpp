@@ -1,11 +1,9 @@
 #include "../include/library.hpp"
+#include <QApplication>
 
+int main(int argc, char *argv[]) {
 
-int main(void)
-{
-    std::cout << "Hello Password Manager!" << std::endl;
-
+    QApplication application(argc, argv);
     MainWindow window;
-
-    return 0;
+    return application.exec();
 }

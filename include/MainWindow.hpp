@@ -6,20 +6,22 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QLineEdit>
+#include <QtGui>
 
-class MainWindow : public QMainWindow
+class MainWindow
 {
 
-Q_OBJECT // Signals, slots and meta objects
+// Q_OBJECT // Signals, slots and meta objects
 
     private:
         void setupUI(); // Function that inits the UI
+        QWidget m_window;
 
     // User event functions
     private slots:
 
     public:
-        explicit MainWindow(QWidget *parent = null); // constructor explicito que inicializará la clase qmainwindow
+        explicit MainWindow(void); // constructor explicito que inicializará la clase qmainwindow
         ~MainWindow();
 };
 
