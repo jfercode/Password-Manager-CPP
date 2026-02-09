@@ -29,7 +29,7 @@ compile:
 
 endif
 
-run:
+run: build-all
 	@echo "$(BLUE)▶️  Ejecutando aplicación...$(NC)"
 	@if [ -f ./build/PasswordManager ]; then \
 		./build/PasswordManager; \
@@ -141,7 +141,7 @@ setup: docker-build docker-up
 
 dev: docker-up docker-bash
 
-build-all: cmake compile
+build-all: cmake compile 
 	@echo "$(GREEN)✓ Build completado$(NC)"
 	@echo "$(YELLOW)Próximo paso: make run$(NC)"
 

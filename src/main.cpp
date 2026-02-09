@@ -1,9 +1,15 @@
 #include "../include/library.hpp"
-#include <QApplication>
 
 int main(int argc, char *argv[]) {
 
-    QApplication application(argc, argv);
-    MainWindow window;
-    return application.exec();
+    QApplication app(argc, argv);
+    LoginDialog login;
+
+    if (login.exec() == QDialog::Accepted)
+    {
+        MainWindow window;  // Creates Main Window
+        //  Here i need to start the loop
+        return app.exec();
+    }
+    return (0);
 }

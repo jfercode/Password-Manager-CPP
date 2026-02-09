@@ -19,6 +19,9 @@ set(CMAKE_AUTOMOC ON)                   # Meta-Object Compiler automático (sign
 set(CMAKE_AUTORCC ON)                   # Resource Compiler automático (.qrc files)
 set(CMAKE_AUTOUIC ON)                   # User Interface Compiler automático (.ui files)
 
+# Add compiler flags
+add_compile_options(-Wall -Wextra -Werror)
+
 # ============================================================================
 # SECCIÓN 2: Buscar Dependencias Externas
 # ============================================================================
@@ -72,6 +75,7 @@ set(STORAGE_HEADERS
 # --- Core Module (Lógica de aplicación) ---
 set(CORE_SOURCES
     # src/core/.cpp
+    src/core/Debug.cpp
 )
 
 set(CORE_HEADERS
@@ -82,11 +86,13 @@ set(CORE_HEADERS
 set(UI_SOURCES
     # src/ui/.cpp
     src/ui/MainWindow.cpp
+    src/ui/LoginDialog.cpp
 )
 
 set(UI_HEADERS
     # include/ui/.h
     include/MainWindow.hpp
+    include/LoginDialog.hpp
 )
 
 # --- Qt Designer UI Files ---

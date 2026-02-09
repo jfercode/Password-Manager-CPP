@@ -3,25 +3,30 @@
 
 #include "library.hpp"
 
-#include <QMainWindow>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QtGui>
-
-class MainWindow
+class MainWindow : public QMainWindow
 {
-
-// Q_OBJECT // Signals, slots and meta objects
+    Q_OBJECT // Signals, slots and meta objects
 
     private:
-        void setupUI(); // Function that inits the UI
-        QWidget m_window;
+        void setupUI();
+
+        QPushButton *addBttn;
+        QPushButton *refreshBttn;
+        QPushButton *deleteBttn;
+        QPushButton *logoutBttn;
 
     // User event functions
     private slots:
+        void onClickAddPssBttn();
+        void onClickDeleteBttn();
+        void onClickLogoutBttn();
+
+        // void onViewPassword(int row);
+        // void onEditPassword(int row);
+        // void onDeletePassword(int row);
 
     public:
-        explicit MainWindow(void); // constructor explicito que inicializará la clase qmainwindow
+        explicit MainWindow(void);
         ~MainWindow();
 };
 
