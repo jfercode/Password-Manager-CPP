@@ -80,6 +80,36 @@ void MainWindow::setupUI()
     passwordTable->setItem(0, 1, new QTableWidgetItem("john@example.com"));
     passwordTable->setItem(0, 2, new QTableWidgetItem("••••••••"));
     
+   // Action Layout - CREATE A CONTAINER WIDGET
+    QWidget *actionWidget = new QWidget(this);
+    QHBoxLayout *actionLayout = new QHBoxLayout(actionWidget);
+    actionLayout->setContentsMargins(2, 2, 2, 2);
+    actionLayout->setSpacing(5);
+    
+    // Create buttons
+    QPushButton *viewBtn = new QPushButton("👁", this);
+    viewBtn->setMaximumWidth(40);
+    
+    QPushButton *editBtn = new QPushButton("✏️", this);
+    editBtn->setMaximumWidth(40);
+    
+    QPushButton *deleteBtn = new QPushButton("🗑️", this);
+    deleteBtn->setMaximumWidth(40);
+    
+    // Add buttons to layout
+    actionLayout->addWidget(viewBtn);
+    actionLayout->addWidget(editBtn);
+    actionLayout->addWidget(deleteBtn);
+    actionLayout->addStretch();
+    
+    // SET THE WIDGET IN THE TABLE CELL
+    passwordTable->setCellWidget(0, 3, actionWidget);
+    
+    // Connect buttons to slots
+    // connect(viewBtn, &QPushButton::clicked, this, &MainWindow::onClickViewBtn);
+    // connect(editBtn, &QPushButton::clicked, this, &MainWindow::onClickEditBtn);
+    // connect(deleteBtn, &QPushButton::clicked, this, &MainWindow::onClickDeleteBtn);
+    
     mainLayout->addWidget(passwordTable);
 
     // ============ BUTTONS SECTION ============ //
