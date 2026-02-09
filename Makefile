@@ -16,10 +16,6 @@ compile:
 	cd /app/build && make -j$$(nproc)
 	@echo "$(GREEN)✓ Compilación exitosa$(NC)"
 
-run:
-	@echo "$(BLUE)▶️  Ejecutando aplicación...$(NC)"
-	/app/$(BIN_PATH)
-
 else
 # FUERA DEL CONTENEDOR - usar docker-compose
 cmake:
@@ -31,11 +27,16 @@ compile:
 	docker-compose exec app bash -c "cd /app/build && make -j$$(nproc)"
 	@echo "$(GREEN)✓ Compilación exitosa$(NC)"
 
+endif
+
 run:
 	@echo "$(BLUE)▶️  Ejecutando aplicación...$(NC)"
-	docker-compose exec app bash -c "/app/$(BIN_PATH)"
+	@if [ -f ./build/PasswordManager ]; then \
+		./build/PasswordManager; \
+	else \
+        echo "$(RED)✗ No se ha encontrado el ejecutable, por favor ejecuta primero$(NC)make build-all"; \
+	fi
 
-endif
 ################################################################################
 
 # Variables
