@@ -15,5 +15,6 @@ class NewUserDialog : public QDialog
     public:
         explicit NewUserDialog(QWidget *parent = nullptr);
         ~NewUserDialog();
-}
+};
+
 #endif

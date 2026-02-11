@@ -20,7 +20,7 @@ set(CMAKE_AUTORCC ON)                   # Resource Compiler automático (.qrc fi
 set(CMAKE_AUTOUIC ON)                   # User Interface Compiler automático (.ui files)
 
 # Add compiler flags
-add_compile_options(-Wall -Wextra -Werror)
+add_compile_options(-Wall -Wextra -Werror -I include/)
 
 # ============================================================================
 # SECCIÓN 2: Buscar Dependencias Externas
@@ -42,9 +42,12 @@ find_package(OpenSSL REQUIRED)
 # PkgConfig - Herramienta para encontrar librerías
 find_package(PkgConfig REQUIRED)
 
+# Set PKG_CONFIG_PATH to include local installations
+set(ENV{PKG_CONFIG_PATH} "/usr/local/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+
 # SQLCipher - SQLite3 con cifrado transparente
-# TO DO: Descomentar para primera compilación (printf test)
-# pkg_check_modules(SQLCIPHER REQUIRED sqlcipher)
+# Note: After compilation, SQLCipher registers as 'sqlite3' in pkg-config
+pkg_check_modules(SQLCIPHER REQUIRED sqlite3)
 # Nota: SQLCipher = SQLite3 + AES-256 integrado
 # Proporciona:
 # - ${SQLCIPHER_LIBRARIES}: librerías a linkear
@@ -54,22 +57,31 @@ find_package(PkgConfig REQUIRED)
 # SECCIÓN 3: Definir Archivos Fuente y Headers
 # ============================================================================
 
+set (APP_SOURCES
+    src/app/AuthenticationManager.cpp
+)
+
+set (APP_HEADERS
+    include/AuthenticationManager.hpp
+)
+
+
 # --- Crypto Module (Operaciones criptográficas) ---
 set(CRYPTO_SOURCES
-    # src/crypto/.cpp
+    src/crypto/CryptoManager.cpp
 )
 
 set(CRYPTO_HEADERS
-    # include/crypto/.h
+    include/CryptoManager.hpp
 )
 
 # --- Storage Module (Persistencia en BD) ---
 set(STORAGE_SOURCES
-    # src/storage/.cpp
+    src/storage/SQLiteCipherDB.cpp
 )
 
 set(STORAGE_HEADERS
-    # include/storage/.h
+    include/SQLiteCipherDB.hpp
 )
 
 # --- Core Module (Lógica de aplicación) ---
@@ -84,15 +96,15 @@ set(CORE_HEADERS
 
 # --- UI Module (Interfaz gráfica Qt5) ---
 set(UI_SOURCES
-    # src/ui/.cpp
     src/ui/MainWindow.cpp
     src/ui/LoginDialog.cpp
+    src/ui/NewUserDialog.cpp
 )
 
 set(UI_HEADERS
-    # include/ui/.h
     include/MainWindow.hpp
     include/LoginDialog.hpp
+    include/NewUserDialog.hpp
 )
 
 # --- Qt Designer UI Files ---
@@ -107,6 +119,7 @@ set(MAIN_SOURCES
 
 # --- Combine All Files ---
 set(SOURCES
+    ${APP_SOURCES}
     ${MAIN_SOURCES}
     ${CRYPTO_SOURCES}
     ${STORAGE_SOURCES}
@@ -115,6 +128,7 @@ set(SOURCES
 )
 
 set(HEADERS
+    ${APP_HEADERS}
     ${CRYPTO_HEADERS}
     ${STORAGE_HEADERS}
     ${CORE_HEADERS}
@@ -140,12 +154,12 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     # Criptografía
     OpenSSL::Crypto
     
-    # Base de datos (COMENTADO TEMPORALMENTE para prueba inicial)
-    # ${SQLCIPHER_LIBRARIES}
+    # Base de datos
+    ${SQLCIPHER_LIBRARIES}
 )
 
 # Incluir directorios de headers
 target_include_directories(${PROJECT_NAME} PRIVATE
     include/                    # Headers propios
-    # ${SQLCIPHER_INCLUDE_DIRS}   # COMENTADO TEMPORALMENTE para prueba inicial
+    ${SQLCIPHER_INCLUDE_DIRS}   # SQLite Cipher headers
 )

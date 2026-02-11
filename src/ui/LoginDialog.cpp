@@ -1,7 +1,7 @@
-#include "../../include/LoginDialog.hpp"
+#include "LoginDialog.hpp"
 
 // 
-LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent)
+LoginDialog::LoginDialog(QWidget *parent, AuthenticationManager *auth) : QDialog(parent)
 {
     // Window Title
     setWindowTitle("Login Password Manager");
@@ -10,6 +10,7 @@ LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent)
     PrintLog(std::cout, YELLOW "Login Dialog" RESET " - Initialazing UI...");    
     setupUi();
     
+    authM = auth;
     // Connect signal to slot
     PrintLog(std::cout, YELLOW "Login Dialog" RESET " - Establishing buttons connection...");    
     connect(loginBttn, &QPushButton::clicked, this, &LoginDialog::onLoginClicked);
@@ -51,9 +52,10 @@ void LoginDialog::onLoginClicked()
 {
     QString user = userEdit->text();
     QString pass = passEdit->text();
-
+    
     // Minimal login // TODO: Change this in a future
-    if (user == "admin" && pass == "1234")
+    // if (user == "admin" && pass == "1234")
+    if (authM && authM->authenticateUser(user.toStdString(), pass.toStdString()))
         accept();
     else
         QMessageBox::warning(this, "Error", "Credeniales incorrectas");

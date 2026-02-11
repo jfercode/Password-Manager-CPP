@@ -21,9 +21,9 @@ class MainWindow : public QMainWindow
         void onClickDeleteBttn();
         void onClickLogoutBttn();
 
-        // void onViewPassword(int row);
-        // void onEditPassword(int row);
-        // void onDeletePassword(int row);
+        void onViewPassword(int row);
+        void onEditPassword(int row);
+        void onDeletePassword(int row);
 
     public:
         explicit MainWindow(void);

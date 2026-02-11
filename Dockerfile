@@ -80,6 +80,23 @@ RUN cd /tmp && \
     ldconfig && \
     rm -rf /tmp/sqlcipher
 
+# Crear archivo pkg-config para SQLCipher
+RUN mkdir -p /usr/local/lib/pkgconfig && \
+    echo "prefix=/usr/local" > /usr/local/lib/pkgconfig/sqlcipher.pc && \
+    echo "exec_prefix=\${prefix}" >> /usr/local/lib/pkgconfig/sqlcipher.pc && \
+    echo "libdir=\${exec_prefix}/lib" >> /usr/local/lib/pkgconfig/sqlcipher.pc && \
+    echo "includedir=\${prefix}/include" >> /usr/local/lib/pkgconfig/sqlcipher.pc && \
+    echo "" >> /usr/local/lib/pkgconfig/sqlcipher.pc && \
+    echo "Name: SQLCipher" >> /usr/local/lib/pkgconfig/sqlcipher.pc && \
+    echo "Description: SQL database engine with encryption" >> /usr/local/lib/pkgconfig/sqlcipher.pc && \
+    echo "Version: 4.5.4" >> /usr/local/lib/pkgconfig/sqlcipher.pc && \
+    echo "Libs: -L\${libdir} -lsqlcipher" >> /usr/local/lib/pkgconfig/sqlcipher.pc && \
+    echo "Cflags: -I\${includedir}" >> /usr/local/lib/pkgconfig/sqlcipher.pc && \
+    echo "Requires: openssl" >> /usr/local/lib/pkgconfig/sqlcipher.pc
+
+# Actualizar pkg-config
+ENV PKG_CONFIG_PATH="/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH"
+
 # ============================================================================
 # SECCIÓN 6: Setup del contenedor
 # ============================================================================

@@ -6,6 +6,7 @@
     #include <stdio.h>
     #include <iostream>
     #include <string>
+    #include <vector>
 
     #ifndef WIDTH
     # define WIDTH 1920
@@ -33,8 +34,10 @@
     #include <QLineEdit>
     #include <QtGui>
 
+    // Forward QT library class declaration
     class QFont;
     class QLabel;
+    class QDialog;
     class QWidget;
     class QLineEdit;
     class QtWidgets;
@@ -49,6 +52,16 @@
     // UI classes
     #include "MainWindow.hpp"
     #include "LoginDialog.hpp"
+    #include "NewUserDialog.hpp"
+
+    // Crypto classes
+    #include "CryptoManager.hpp"
+
+    // Storage classes
+    #include "SQLiteCipherDB.hpp"
+
+    // App classes
+    #include "AuthenticationManager.hpp"
 
     // Custom functions
     std::string ObtainCurrentTime();

@@ -6,10 +6,10 @@ MainWindow::MainWindow(void)
     // Window Setup
     setWindowTitle("Password Manager - Secure Storage");
     // TODO: Add icon
-    //setWindowIcon(QIcon(":/icon route"));
+    // setWindowIcon(QIcon(":/icon route"));
 
     // Set up Ui
-    PrintLog(std::cout, YELLOW "Main Window" RESET " - Initialazing UI...");    
+    PrintLog(std::cout, YELLOW "Main Window" RESET " - Initialazing UI...");
     setupUI();
 
     // TODO Conect bttns to functions here
@@ -29,7 +29,7 @@ MainWindow::~MainWindow() {}
 void MainWindow::setupUI()
 {
     resize(WIDTH, HEIGTH); // TODO: make widthxheight tests
-    setMinimumSize(WIDTH/2, HEIGTH/2);
+    setMinimumSize(WIDTH / 2, HEIGTH / 2);
 
     //  Main container (central widget)
     QWidget *centralWidget = new QWidget(this);
@@ -49,22 +49,22 @@ void MainWindow::setupUI()
     tittleFont.setPointSize(16);
     tittleFont.setBold(true);
     tittleLabel->setFont(tittleFont);
-    
+
     // Search Box
-    QLineEdit *searchBox = new QLineEdit(this);
-    searchBox->setPlaceholderText("Search passwords...");
-    searchBox->setMaximumWidth(250);
+    // QLineEdit *searchBox = new QLineEdit(this);
+    // searchBox->setPlaceholderText("Search passwords...");
+    // searchBox->setMaximumWidth(250);
 
     headerLayout->addWidget(tittleLabel);
     headerLayout->addStretch();
-    headerLayout->addWidget(searchBox);
+    // headerLayout->addWidget(searchBox);
 
     mainLayout->addWidget(tittleLabel);
 
     // ============ TABLE SECTION ============ //
     QTableWidget *passwordTable = new QTableWidget(this);
     passwordTable->setColumnCount(4);
-    passwordTable->setHorizontalHeaderLabels({"Website", "Username","Password", "Actions"});
+    passwordTable->setHorizontalHeaderLabels({"Website", "Username", "Password", "Actions"});
     passwordTable->horizontalHeader()->setStretchLastSection(false);
     passwordTable->setColumnWidth(0, 200);
     passwordTable->setColumnWidth(1, 200);
@@ -73,42 +73,43 @@ void MainWindow::setupUI()
     passwordTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     passwordTable->setSelectionMode(QAbstractItemView::SingleSelection);
     passwordTable->setAlternatingRowColors(true);
-    
-    // Add sample data (TODO: Remove this later - just for demonstration) 
+
+    // Add sample data (TODO: Remove this later - just for demonstration)
     passwordTable->insertRow(0);
     passwordTable->setItem(0, 0, new QTableWidgetItem("Gmail"));
     passwordTable->setItem(0, 1, new QTableWidgetItem("john@example.com"));
     passwordTable->setItem(0, 2, new QTableWidgetItem("••••••••"));
-    
-   // Action Layout - CREATE A CONTAINER WIDGET
+
+    // Action Layout - CREATE A CONTAINER WIDGET
     QWidget *actionWidget = new QWidget(this);
     QHBoxLayout *actionLayout = new QHBoxLayout(actionWidget);
     actionLayout->setContentsMargins(2, 2, 2, 2);
     actionLayout->setSpacing(5);
-    
+
     // Create buttons
     QPushButton *viewBtn = new QPushButton("👁", this);
     viewBtn->setMaximumWidth(40);
-    
+
     QPushButton *editBtn = new QPushButton("✏️", this);
     editBtn->setMaximumWidth(40);
-    
+
     QPushButton *deleteBtn = new QPushButton("🗑️", this);
     deleteBtn->setMaximumWidth(40);
-    
+
     // Add buttons to layout
     actionLayout->addWidget(viewBtn);
     actionLayout->addWidget(editBtn);
     actionLayout->addWidget(deleteBtn);
     actionLayout->addStretch();
-    
+
     // SET THE WIDGET IN THE TABLE CELL
     passwordTable->setCellWidget(0, 3, actionWidget);
-    
-    // Connect buttons to slots
-    // connect(viewBtn, &QPushButton::clicked, this, &MainWindow::onClickViewBtn);
-    // connect(editBtn, &QPushButton::clicked, this, &MainWindow::onClickEditBtn);
-    // connect(deleteBtn, &QPushButton::clicked, this, &MainWindow::onClickDeleteBtn);
+
+    // Connect buttons to slots WITH row information using lambda
+    int row = 0;
+    connect(viewBtn, &QPushButton::clicked, this, [this, row]() { this->onViewPassword(row); });
+    connect(editBtn, &QPushButton::clicked, this, [this, row]() { this->onEditPassword(row); });
+    connect(deleteBtn, &QPushButton::clicked, this, [this, row]() { this->onDeletePassword(row); });
     
     mainLayout->addWidget(passwordTable);
 
@@ -131,27 +132,44 @@ void MainWindow::setupUI()
     bttnLayout->addWidget(logoutBttn);
 
     mainLayout->addLayout(bttnLayout);
-    
+
     // Set layout to central widget
     centralWidget->setLayout(mainLayout);
 }
 
 // Buttons handle
-void    MainWindow::onClickAddPssBttn()
+void MainWindow::onClickAddPssBttn()
 {
-    PrintLog(std::cout,  MAGENTA "Add Password Button" RESET " - Adding a new password...");
+    PrintLog(std::cout, MAGENTA "Add Password Button" RESET " - Adding a new password...");
     // TODO: Implementar Añadir contenido
 }
 
-void    MainWindow::onClickLogoutBttn() 
+void MainWindow::onClickLogoutBttn()
 {
-    PrintLog(std::cout,  MAGENTA "Logout Button" RESET " - Loging out...");
+    PrintLog(std::cout, MAGENTA "Logout Button" RESET " - Loging out...");
     // TODO: Implementar logout
-
 }
-void    MainWindow::onClickDeleteBttn() 
-{
-    PrintLog(std::cout,  MAGENTA "Delete Password Button" RESET " - Handling delete password...");
-    // TODO: Implementar Delete
 
+void MainWindow::onClickDeleteBttn()
+{
+    PrintLog(std::cout, MAGENTA "Delete Password Button" RESET " - Handling delete password...");
+    // TODO: Implementar Delete
+}
+
+void MainWindow::onViewPassword(int row)
+{
+    PrintLog(std::cout, MAGENTA "View Password" RESET " for %d row", row);
+    // TODO: Implementar view Password
+}
+
+void MainWindow::onEditPassword(int row)
+{
+    PrintLog(std::cout, MAGENTA "Edit Password" RESET " for %d row", row);
+    // TODO: Implementar edit Password
+}
+
+void MainWindow::onDeletePassword(int row)
+{
+    PrintLog(std::cout, MAGENTA "Delete Password" RESET " for %d row", row);
+    // TODO: Implementar delete Password
 }
