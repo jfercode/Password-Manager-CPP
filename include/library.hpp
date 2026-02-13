@@ -7,6 +7,7 @@
     #include <iostream>
     #include <string>
     #include <vector>
+    #include <sys/stat.h>
 
     #ifndef WIDTH
     # define WIDTH 1920
@@ -65,6 +66,7 @@
 
     // Custom functions
     std::string ObtainCurrentTime();
+    bool createDirectory(const std::string &dirPath);
     void PrintLog(std::ostream &oss, const std::string message, ...);
 
 #endif

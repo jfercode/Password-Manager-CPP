@@ -31,10 +31,10 @@ endif
 
 run: build-all
 	@echo "$(BLUE)▶️  Ejecutando aplicación...$(NC)"
-	@if [ -f ./build/PasswordManager ]; then \
-		./build/PasswordManager; \
+	@if [ -f ./run-app.sh ]; then \
+		./run-app.sh; \
 	else \
-        echo "$(RED)✗ No se ha encontrado el ejecutable, por favor ejecuta primero$(NC)make build-all"; \
+        echo "$(RED)✗ No se ha encontrado el script, por favor ejecuta primero$(NC)make build-all"; \
 	fi
 
 ################################################################################

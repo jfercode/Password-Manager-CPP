@@ -88,6 +88,8 @@ set(STORAGE_HEADERS
 set(CORE_SOURCES
     # src/core/.cpp
     src/core/Debug.cpp
+    src/core/Filesystem.cpp
+
 )
 
 set(CORE_HEADERS

@@ -1,20 +1,49 @@
 #include "SQLiteCipherDB.hpp"
 
-// TODO: Implement all methods here
 // Start with: Constructor -> Helper -> Destructor -> Main Methods
-SQLiteCipherDB::SQLiteCipherDB() : db(nullptr), dbPath("") // TODO: pensar en un path para la db
+SQLiteCipherDB::SQLiteCipherDB() : db(nullptr), dbPath("")
 {
     PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Initializing db...");
 
+    // Looking for the database path
+    if (!findDataBasePath())
+        throw std::runtime_error(RED "Error" RESET " failed to determinate database path");
+
     // Trying to open or create the db
-    int dbRes = sqlite3_open(dbPath, &db);
-    if (dbRes != 1)
-        throw std::runtime_error(RED "Error" RESET " while trying to initialize the db");
+    int dbRes = sqlite3_open(dbPath.c_str(), &db);
+    if (dbRes != SQLITE_OK)
+        throw std::runtime_error(std::string(RED "Error" RESET " opening DB: ") + sqlite3_errmsg(db));
 
     // Set up db
     setupDB();
 
-    PrintLog(std::cout, CYAN "SQLiteCipherDB" GREEN " - db running!");
+    PrintLog(std::cout, CYAN "SQLiteCipherDB" GREEN " - db running!" RESET);
+}
+
+bool SQLiteCipherDB::findDataBasePath(void)
+{
+    // Get Home environment variable value to build and check the path
+    const char *homeEnv = std::getenv("HOME");
+    if (!homeEnv)
+    {
+        PrintLog(std::cerr, RED "Error: HOME environment variable not found" RESET);
+        return false;
+    }
+
+    // Build the directory path in $HOMEDIR/.local/share/passman
+    std::string baseDir = std::string(homeEnv) + "/.local";
+    std::string shareDir = baseDir + "/share";
+    std::string appDir = shareDir + "/passman";
+
+    // Ensure that ~/.local/share/passman exits if not create it
+    if (!createDirectory(baseDir) || !createDirectory(shareDir) || !createDirectory(appDir))
+        return false;
+
+    // Assign db path 
+    dbPath = appDir + "/passman.db";
+    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - DB Path: %s", dbPath.c_str());
+
+    return true;
 }
 
 void SQLiteCipherDB::setupDB(void)
@@ -55,7 +84,7 @@ bool SQLiteCipherDB::createUser(const std::string &username,
                                 const std::string &passwordHash,
                                 const std::string &salt) const
 {
-    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Adding new user %s...", username);
+    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Adding new user %s...", username.c_str());
 
     // sql line
     const char *sql = "INSERT INTO users (username, password_hash, password_salt) VALUES (?, ?, ?);";
@@ -74,11 +103,11 @@ bool SQLiteCipherDB::createUser(const std::string &username,
     if (rSql != SQLITE_DONE)
     {
         sqlite3_finalize(stmt); // finalize db order
-        PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - " RED " Can´t add user %s to the db" RESET, username);
+        PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - " RED " Can´t add user %s to the db" RESET, username.c_str());
         return false;
     }
     sqlite3_finalize(stmt); // finalize db order
-    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " -  user %s added to the db" RESET, username);
+    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " -  user %s added to the db" RESET, username.c_str());
     return true;
 }
 
@@ -88,7 +117,7 @@ bool SQLiteCipherDB::getUserHash(
     std::string &hash,
     std::string &salt) const
 {
-    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Obtaining user %s hash and salt...", username);
+    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Obtaining user %s hash and salt...", username.c_str());
 
     // sql line => Obtain password_hash and salt from the users table where username matches the parameter
     const char *sql = "SELECT password_hash, password_salt FROM users WHERE username = ?";
@@ -107,13 +136,13 @@ bool SQLiteCipherDB::getUserHash(
     if (rSql != SQLITE_ROW) // Handle sqlite order here (if not found a SQLITE ROW)
     {
         sqlite3_finalize(stmt); // finalize db order
-        PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - " RED " Can´t find %s in the db" RESET, username);
+        PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - " RED " Can´t find %s in the db" RESET, username.c_str());
         return false;
     }
 
     // Extract column data
     const unsigned char *hash_ptr = sqlite3_column_text(stmt, 0); // Column 0 hash
-    const unsigned char *salt_ptr = sqlite3_column_text(stmt, 2); // Column 1 salt
+    const unsigned char *salt_ptr = sqlite3_column_text(stmt, 1); // Column 1 salt
 
     if (hash_ptr != nullptr && salt_ptr != nullptr)
     {
@@ -124,22 +153,22 @@ bool SQLiteCipherDB::getUserHash(
     {
         sqlite3_finalize(stmt); // finalize db order
         if (hash_ptr == nullptr)
-            PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - " RED " Can´t find %s hash in the db" RESET, username);
+            PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - " RED " Can´t find %s hash in the db" RESET, username.c_str());
         if (salt_ptr == nullptr)
-            PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - " RED " Can´t find %s salt in the db" RESET, username);
+            PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - " RED " Can´t find %s salt in the db" RESET, username.c_str());
         return false;
     }
     sqlite3_finalize(stmt); // finalize db order
-    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - %s hash and salt obtaining", username);
+    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - %s hash and salt obtaining", username.c_str());
     return true;
 }
 
 // Check if username already exists (prevent duplicates)
 bool SQLiteCipherDB::userExists(const std::string &username) const
 {
-    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Looking for %s user...", username);
+    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Looking for %s user...", username.c_str());
 
-    // sql line => Returns number of matching rows where username row matchs 
+    // sql line => Returns number of matching rows where username row matchs
     const char *sql = "SELECT COUNT(*) FROM users WHERE username = ?";
 
     // Prepare order to db
@@ -154,12 +183,12 @@ bool SQLiteCipherDB::userExists(const std::string &username) const
     if (rSql != SQLITE_ROW) // Handle sqlite order here (if not found a SQLITE ROW)
     {
         sqlite3_finalize(stmt); // finalize db order
-        PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - " RED " Can´t find %s user in the db" RESET, username);
+        PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - " RED " Can´t find %s user in the db" RESET, username.c_str());
         return false;
     }
     // Get column 0 (username) as integer
     int count = sqlite3_column_int(stmt, 0);
-    sqlite3_finalize(stmt);  // finalize db order
-    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " -  %s user appears %d times", username, count);
+    sqlite3_finalize(stmt); // finalize db order
+    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " -  %s user appears %d times", username.c_str(), count);
     return (count > 0);
 }

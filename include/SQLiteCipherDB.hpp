@@ -10,13 +10,11 @@
 class SQLiteCipherDB
 {
     private:
-        // TODO: Add private members
-        // HINT: You need a pointer to the database handle
-        // HINT: You need a constant string for the database file path
         sqlite3 *db;
-        std::string *dbPath;
+        std::string dbPath;
         
         void setupDB(void);
+        bool findDataBasePath();
     public:
         SQLiteCipherDB();
         ~SQLiteCipherDB();
@@ -35,7 +33,6 @@ class SQLiteCipherDB
 
         // Check for a user in DB
         bool userExists(const std::string &username) const;
-ate helper method to initialize the database schema
 };
 
 #endif
