@@ -84,9 +84,11 @@
 ## 🎯 Búsqueda Rápida por Tema
 
 ### Autenticación
+- **¿Cómo funciona la inicialización del sistema?** → [`APP_MODULE.md#flujo-de-inicialización-del-sistema-nuevo`](APP_MODULE.md#flujo-de-inicialización-del-sistema-nuevo)
 - **¿Cómo funciona el login?** → [`README.md#flujo-2-autenticación-de-usuario`](README.md#flujo-2-autenticación-de-usuario)
 - **¿Cómo se registra un usuario?** → [`README.md#flujo-1-registro-de-nuevo-usuario`](README.md#flujo-1-registro-de-nuevo-usuario)
 - **¿Qué métodos tiene AuthenticationManager?** → [`APP_MODULE.md#clase-authenticationmanager`](APP_MODULE.md#clase-authenticationmanager)
+- **¿Qué es InitializationManager?** → [`APP_MODULE.md#clase-initializationmanager`](APP_MODULE.md#clase-initializationmanager)
 
 ### Seguridad y Criptografía
 - **¿Cómo se hashean las contraseñas?** → [`CRYPTO_MODULE.md#algoritmo-pbkdf2-sha256`](CRYPTO_MODULE.md#algoritmo-pbkdf2-sha256)

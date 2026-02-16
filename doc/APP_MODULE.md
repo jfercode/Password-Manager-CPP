@@ -7,6 +7,79 @@ El módulo `app/` contiene la lógica de autenticación y gestión de usuarios d
 
 ## Archivos Incluidos
 
+### 1. **InitializationManager.hpp** (NEW)
+Archivo de encabezado que define la clase `InitializationManager`.
+
+**Ubicación:** `/include/InitializationManager.hpp`
+
+#### Clase: `InitializationManager`
+Gestor centralizado de inicialización del sistema que verifica si la aplicación es una instalación nueva o existente.
+
+**Miembros Privados:**
+- `const SQLiteCipherDB *db` - Puntero a instancia de base de datos para verificar estado
+- `const AuthenticationManager *authM` - Puntero a gestor de autenticación
+
+**Constructor:**
+```cpp
+InitializationManager(const SQLiteCipherDB *database, const AuthenticationManager *auth);
+```
+- Inicializa el gestor con referencias a la base de datos y autenticación
+- Registra logs de inicialización
+
+**Destructor:**
+```cpp
+~InitializationManager();
+```
+- Realiza limpieza de recursos
+
+**Métodos Públicos:**
+
+1. **`isSystemInitialized() const`**
+   - **Propósito:** Verifica si el sistema ha sido inicializado (si existe un usuario admin)
+   - **Retorno:** `bool` - `true` si existe un usuario admin, `false` en caso contrario
+   - **Proceso:**
+     1. Llama a `SQLiteCipherDB::hasMasterUser()`
+     2. Registra logs del estado del sistema
+     3. Retorna el resultado
+
+2. **`getRequiredDialogType() const`**
+   - **Propósito:** Determina qué diálogo mostrar al usuario
+   - **Retorno:** `int` - 0 para NewUserDialog (primer setup), 1 para LoginDialog (usuario existente)
+   - **Proceso:**
+     1. Verifica si sistema está inicializado
+     2. Retorna tipo de diálogo apropiado
+
+---
+
+### 2. **InitializationManager.cpp**
+Implementación de la clase `InitializationManager`.
+
+**Ubicación:** `/src/app/InitializationManager.cpp`
+
+#### Detalles de Implementación
+
+**Constructor:**
+```cpp
+InitializationManager::InitializationManager(const SQLiteCipherDB *database, const AuthenticationManager *auth)
+    : db(database), authM(auth)
+```
+- Asigna los punteros a las dependencias
+- Registra log de inicialización con color CYAN
+
+**`isSystemInitialized()`:**
+- Verifica que `db` no sea null
+- Llama a `db->hasMasterUser()`
+- Registra log con color GREEN si inicializado, YELLOW si no
+- Retorna el resultado
+
+**`getRequiredDialogType()`:**
+- Utiliza `isSystemInitialized()` para determinar estado
+- Retorna 0 para NewUserDialog (sistema nuevo)
+- Retorna 1 para LoginDialog (sistema existente)
+- Registra logs descriptivos del tipo de diálogo
+
+---
+
 ### 1. **AuthenticationManager.hpp**
 Archivo de encabezado que define la clase `AuthenticationManager`.
 
@@ -48,16 +121,17 @@ AuthenticationManager(const CryptoManager *cry, const SQLiteCipherDB *dB);
      3. Verifica la contraseña contra el hash usando CryptoManager
      4. Registra logs en consola durante el proceso
 
-2. **`registerNewUser(const std::string &username, const std::string &password) const`**
+2. **`registerNewUser(const std::string &username, const std::string &password, bool isMaster) const`**
    - **Propósito:** Registra un nuevo usuario en el sistema
    - **Parámetros:**
      - `username`: Nombre de usuario para la nueva cuenta
      - `password`: Contraseña en texto plano a proteger
+     - `isMaster`: Boolean que indica si el usuario es administrador (true) o usuario normal (false)
    - **Retorno:** `bool` - `true` si el registro es exitoso, `false` en caso contrario
    - **Proceso:**
      1. Verifica que el usuario no exista ya en la base de datos
      2. Genera hash y salt usando CryptoManager
-     3. Crea el usuario en la base de datos con los datos criptografrados
+     3. Crea el usuario en la base de datos con los datos criptografrados y el flag is_admin
      4. Registra logs del proceso
 
 ---
@@ -87,8 +161,45 @@ AuthenticationManager::AuthenticationManager(const CryptoManager *cry, const SQL
 - Verifica que el usuario no exista (previene duplicados)
 - Genera el par hash-salt usando `CryptoManager::hashPassword()`
 - Utiliza structured binding `auto [hash, salt] = ...` (C++17)
-- Llama a `SQLiteCipherDB::createUser()` para persistir los datos
+- Llama a `SQLiteCipherDB::createUser()` con el parámetro `isMaster` para persistir los datos
 - Registra logs detallados del proceso
+- El parámetro `isMaster` se convierte a `1` o `0` en la base de datos (is_admin field)
+
+---
+
+## Flujo de Inicialización del Sistema (NUEVO)
+
+```
+Aplicación Inicia
+    ↓
+QApplication creado
+    ↓
+InitializationManager::isSystemInitialized()
+    ↓
+    SQLiteCipherDB::hasMasterUser()
+    ↓
+    SELECT COUNT(*) FROM users WHERE is_admin = 1
+    ↓
+    ┌─ Retorna 0 (No existe admin)
+    │   ↓
+    │   Mostrar NewUserDialog
+    │   (Crear primer usuario admin)
+    │
+    └─ Retorna > 0 (Existe admin)
+        ↓
+        Mostrar LoginDialog
+        (Usuario existente hace login)
+    ↓
+Dialog::exec()
+    ↓
+    ┌─ Dialog aceptado (Accepted)
+    │   ↓
+    │   MainWindow abre
+    │
+    └─ Dialog rechazado (Rejected)
+        ↓
+        Aplicación cierra
+```
 
 ---
 
@@ -107,18 +218,34 @@ AuthenticationManager::authenticateUser()
 MainWindow (Si autenticación exitosa)
 ```
 
-## Flujo de Registro
+## Flujo de Registro (Nuevo Admin)
 
 ```
-Usuario -> UI (NewUserDialog)
+Usuario -> UI (NewUserDialog - Solo en primer inicio)
     ↓
-AuthenticationManager::registerNewUser()
+NewUserDialog::onLoginClicked()
+    ↓
+AuthenticationManager::registerNewUser(..., isMaster=true)
     ↓
 ├─ SQLiteCipherDB::userExists() - Verifica duplicados
 ├─ CryptoManager::hashPassword() - Genera hash y salt
-├─ SQLiteCipherDB::createUser() - Almacena usuario
+├─ SQLiteCipherDB::createUser(..., is_admin=1) - Almacena como admin
     ↓
-LoginDialog (Usuario creado, puede hacer login)
+MainWindow (Se abre directamente después del registro)
+```
+
+## Flujo de Registro (Usuario Existente)
+
+```
+Usuario -> UI (NewUserDialog desde MainWindow - Futuro)
+    ↓
+AuthenticationManager::registerNewUser(..., isMaster=false)
+    ↓
+├─ SQLiteCipherDB::userExists() - Verifica duplicados
+├─ CryptoManager::hashPassword() - Genera hash y salt
+├─ SQLiteCipherDB::createUser(..., is_admin=0) - Almacena como usuario normal
+    ↓
+LoginDialog (Usuario puede hacer login después)
 ```
 
 ---

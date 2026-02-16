@@ -1,17 +1,16 @@
 # 📋 Documentación Completada - Resumen Ejecutivo
 
-## ✅ Documentación Generada Exitosamente
+## ✅ Documentación Actualizada
 
-**Fecha:** 13 de febrero de 2026  
+**Última Actualización:** 16 de febrero de 2026  
 **Proyecto:** Password Manager C++  
 **Carpeta:** `/doc/`  
 **Total de Archivos:** 9 archivos de documentación  
-**Total de Líneas:** 4,482 líneas  
-**Tamaño Total:** 176 KB  
+**Estado:** Actualizado con Inicialización del Sistema (InitializationManager)
 
 ---
 
-## 📚 Archivos de Documentación Creados
+## 📚 Archivos de Documentación
 
 ### 1. **README.md** (557 líneas | 20 KB)
 **Documentación General del Proyecto**
@@ -24,15 +23,19 @@
 - Guía de compilación y ejecución
 - Conclusión
 
-### 2. **APP_MODULE.md** (176 líneas | 8 KB)
+### 2. **APP_MODULE.md** (ACTUALIZADO)
 **Módulo de Autenticación**
-- Descripción del módulo APP
+- ✨ **NUEVO:** InitializationManager
+  - Verificación de sistema inicializado
+  - Determinación de tipo de diálogo
+  - Flujo de inicialización fresco
 - Clase AuthenticationManager
   - Miembros
   - Constructor y destructor
   - Métodos públicos (registrar, autenticar)
-- Flujos de autenticación y registro
-- Dependencias (CryptoManager, SQLiteCipherDB)
+- ✨ **NUEVO:** Flujo de Inicialización del Sistema
+- Flujos de autenticación y registro (actualizados)
+- Dependencias (CryptoManager, SQLiteCipherDB, InitializationManager)
 - Sistema de logs
 - Consideraciones de seguridad
 - Patrones de diseño
@@ -53,18 +56,22 @@
 - Manejo de errores
 - Alternativas no implementadas
 
-### 4. **STORAGE_MODULE.md** (426 líneas | 16 KB)
+### 4. **STORAGE_MODULE.md** (ACTUALIZADO)
 **Módulo de Persistencia**
 - Descripción del módulo STORAGE
 - Clase SQLiteCipherDB
   - Métodos privados (setup, búsqueda de ruta)
-  - Métodos públicos (crear, obtener, verificar usuario)
+  - ✨ **NUEVO:** Métodos públicos para inicialización
+    - `hasMasterUser()` - Verifica si existe admin
+    - `isMasterUser()` - Verifica si usuario es admin
+  - Métodos públicos estándar (crear, obtener, verificar usuario)
+- ✨ **NUEVO:** Esquema actualizado con columna is_admin
 - Librería SQLite3:
   - Funciones de conexión
   - Ejecución SQL directo
   - Prepared statements
   - Extracción de datos
-- Esquema de base de datos completo
+- Esquema de base de datos actualizado
 - Flujo de operaciones
 - Ubicación de almacenamiento
 - Consideraciones de seguridad

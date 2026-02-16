@@ -58,16 +58,17 @@ SQLiteCipherDB();
 
 **Métodos Públicos:**
 
-1. **`createUser(const std::string &username, const std::string &passwordHash, const std::string &salt) const`**
+1. **`createUser(const std::string &username, const std::string &passwordHash, const std::string &salt, bool isMaster) const`**
    - **Propósito:** Inserta un nuevo usuario en la base de datos
    - **Parámetros:**
      - `username`: Nombre único del usuario
      - `passwordHash`: Hash de la contraseña (formato hexadecimal)
      - `salt`: Salt usado en el hash (formato hexadecimal)
+     - `isMaster`: Boolean que indica si es usuario administrador (true) o normal (false)
    - **Retorno:** `bool` - true si se inserta exitosamente
    - **Proceso:**
-     1. Prepara sentencia SQL INSERT
-     2. Vincula parámetros para evitar SQL injection
+     1. Prepara sentencia SQL INSERT con parámetro is_admin
+     2. Vincula parámetros para evitar SQL injection (incluyendo is_admin como 1 o 0)
      3. Ejecuta la sentencia
      4. Finaliza y limpia el statement
 
@@ -158,10 +159,11 @@ SQLiteCipherDB::~SQLiteCipherDB()
 ```cpp
 bool SQLiteCipherDB::createUser(const std::string &username,
                                 const std::string &passwordHash,
-                                const std::string &salt) const
+                                const std::string &salt,
+                                bool isMaster) const
 ```
 
-**SQL:** `INSERT INTO users (username, password_hash, password_salt) VALUES (?, ?, ?);`
+**SQL:** `INSERT INTO users (username, password_hash, password_salt, is_admin) VALUES (?, ?, ?, ?);`
 
 **Proceso:**
 1. `sqlite3_prepare_v2()` - Compila la sentencia SQL
@@ -170,13 +172,15 @@ bool SQLiteCipherDB::createUser(const std::string &username,
    - Posición 2: passwordHash
    - Posición 3: salt
    - `SQLITE_STATIC` indica que las cadenas persisten durante la ejecución
-3. `sqlite3_step()` - Ejecuta la sentencia
-4. Verifica si retorna `SQLITE_DONE` (éxito)
-5. `sqlite3_finalize()` - Limpia el statement
+3. `sqlite3_bind_int()` - Vincula parámetro booleano:
+   - Posición 4: isMaster convertido a 1 (true) o 0 (false)
+4. `sqlite3_step()` - Ejecuta la sentencia
+5. Verifica si retorna `SQLITE_DONE` (éxito)
+6. `sqlite3_finalize()` - Limpia el statement
 
 **Manejo de Errores:**
 - Si falla, retorna false y registra log en rojo
-- UNIQUE constraint viola si username ya existe
+- UNIQUE constraint se viola si username ya existe
 
 **`getUserHash()`:**
 ```cpp
@@ -212,6 +216,56 @@ bool SQLiteCipherDB::userExists(const std::string &username) const
 4. Extrae el COUNT como entero con `sqlite3_column_int()`
 5. Finaliza statement
 6. Retorna `count > 0`
+
+---
+
+## Métodos de Inicialización (NUEVO)
+
+### 4. **`hasMasterUser() const`** (NUEVO)
+   - **Propósito:** Verifica si el sistema ha sido inicializado (si existe un usuario admin)
+   - **Retorno:** `bool` - true si existe al menos un usuario con is_admin=1
+   - **SQL:** `SELECT COUNT(*) FROM users WHERE is_admin = 1`
+   - **Proceso:**
+     1. Prepara sentencia SELECT COUNT
+     2. Ejecuta y obtiene el resultado
+     3. Extrae el COUNT como entero
+     4. Finaliza statement
+     5. Retorna `count > 0`
+   - **Uso:** Llamado por `InitializationManager::isSystemInitialized()` durante el startup
+
+### 5. **`isMasterUser(const std::string &username) const`**
+   - **Propósito:** Verifica si un usuario específico es el admin/master
+   - **Parámetros:**
+     - `username`: Nombre del usuario a verificar
+   - **Retorno:** `bool` - true si el usuario existe y tiene is_admin=1
+   - **Proceso:**
+     1. Verifica que el usuario exista con `userExists()`
+     2. Cuenta usuarios totales con `SELECT COUNT(*) FROM users`
+     3. Si count == 0, considera como admin
+     4. Registra logs descriptivos
+     5. Retorna resultado
+
+---
+
+## Esquema Actualizado de Base de Datos
+
+La tabla `users` incluye ahora la columna `is_admin` para diferenciar usuarios normales de administradores:
+
+```sql
+CREATE TABLE IF NOT EXISTS users(
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    password_salt TEXT NOT NULL,
+    is_admin INTEGER DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)
+```
+
+**Nueva Columna:**
+- `is_admin`: INTEGER (0 = usuario normal, 1 = administrador/master)
+  - DEFAULT 0: Nuevos usuarios son normales por defecto
+  - Se establece a 1 solo en el primer registro (admin inicial)
 
 ---
 
