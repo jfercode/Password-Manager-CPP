@@ -54,7 +54,7 @@
     #include "MainWindow.hpp"
     #include "LoginDialog.hpp"
     #include "NewUserDialog.hpp"
-
+    #include "AddPasswordDialog.hpp"
     // Crypto classes
     #include "CryptoManager.hpp"
 

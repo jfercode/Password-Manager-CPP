@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
         {
             // Authentication successful - open main window
             PrintLog(std::cout, GREEN "Authentication successful! Opening MainWindow" RESET);
-            MainWindow window;
+            MainWindow window(&db);
             window.show();
             int result = app.exec();
             delete authDialog;
@@ -60,31 +60,3 @@ int main(int argc, char *argv[])
         return (1);
     }
 }
-
-// // TESTING SQL
-// int main(void)
-// {
-//     SQLiteCipherDB db; // Test constructor
-//     std::cout << "Database opened successfully!" << std::endl;
-
-//     // Test createUser
-//     bool ok = db.createUser("testuser", "hash123", "salt456");
-//     if (ok)
-//         std::cout << "User created!" << std::endl;
-//     else
-//         std::cout << "User creation failed!" << std::endl;
-
-//     // Test userExists
-//     bool exists = db.userExists("testuser");
-//     std::cout << "User exists: " << (exists ? "YES" : "NO") << std::endl;
-
-//     // Test getUserHash
-//     std::string h, s;
-//     bool found = db.getUserHash("testuser", h, s);
-//     if (found)
-//     {
-//         std::cout << "Hash: " << h << std::endl;
-//         std::cout << "Salt: " << s << std::endl;
-//     }
-//     return 0;
-// }

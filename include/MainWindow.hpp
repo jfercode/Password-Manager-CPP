@@ -2,14 +2,19 @@
 #define MAINWINDOW_HPP
 
 #include "library.hpp"
+class SQLiteCipherDB;
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT // Signals, slots and meta objects
 
     private:
+        SQLiteCipherDB *_db;
+        QTableWidget *passwordTable;
+        
         void setupUI();
-
+        void updateUI();
+        
         QPushButton *addBttn;
         QPushButton *refreshBttn;
         QPushButton *deleteBttn;
@@ -18,16 +23,17 @@ class MainWindow : public QMainWindow
     // User event functions
     private slots:
         void onClickAddPssBttn();
-        void onClickDeleteBttn();
         void onClickLogoutBttn();
 
-        void onViewPassword(int row);
-        void onEditPassword(int row);
-        void onDeletePassword(int row);
+        void onViewPassword(int id);
+        void onEditPassword(int id);
+        void onDeletePassword(int id);
 
     public:
-        explicit MainWindow(void);
+        explicit MainWindow(SQLiteCipherDB *db);
         ~MainWindow();
-};
+        
+        void    updateUi(void);
+    };
 
 #endif

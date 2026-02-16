@@ -1,7 +1,7 @@
 #include "../../include/MainWindow.hpp"
 
 // MainWindow Constructor
-MainWindow::MainWindow(void)
+MainWindow::MainWindow(SQLiteCipherDB *db) : _db(db)
 {
     // Window Setup
     setWindowTitle("Password Manager - Secure Storage");
@@ -15,7 +15,6 @@ MainWindow::MainWindow(void)
     // TODO Conect bttns to functions here
     PrintLog(std::cout, YELLOW "Main Window" RESET " - Establishing buttons connection...");
     connect(addBttn, &QPushButton::clicked, this, &MainWindow::onClickAddPssBttn);
-    connect(deleteBttn, &QPushButton::clicked, this, &MainWindow::onClickDeleteBttn);
     connect(logoutBttn, &QPushButton::clicked, this, &MainWindow::onClickLogoutBttn);
 
     PrintLog(std::cout, YELLOW "Main Window" RESET " - Showing UI...");
@@ -62,7 +61,7 @@ void MainWindow::setupUI()
     mainLayout->addWidget(tittleLabel);
 
     // ============ TABLE SECTION ============ //
-    QTableWidget *passwordTable = new QTableWidget(this);
+    passwordTable = new QTableWidget(this);
     passwordTable->setColumnCount(4);
     passwordTable->setHorizontalHeaderLabels({"Website", "Username", "Password", "Actions"});
     passwordTable->horizontalHeader()->setStretchLastSection(false);
@@ -74,43 +73,12 @@ void MainWindow::setupUI()
     passwordTable->setSelectionMode(QAbstractItemView::SingleSelection);
     passwordTable->setAlternatingRowColors(true);
 
-    // Add sample data (TODO: Remove this later - just for demonstration)
-    passwordTable->insertRow(0);
-    passwordTable->setItem(0, 0, new QTableWidgetItem("Gmail"));
-    passwordTable->setItem(0, 1, new QTableWidgetItem("john@example.com"));
-    passwordTable->setItem(0, 2, new QTableWidgetItem("••••••••"));
-
     // Action Layout - CREATE A CONTAINER WIDGET
     QWidget *actionWidget = new QWidget(this);
     QHBoxLayout *actionLayout = new QHBoxLayout(actionWidget);
     actionLayout->setContentsMargins(2, 2, 2, 2);
     actionLayout->setSpacing(5);
 
-    // Create buttons
-    QPushButton *viewBtn = new QPushButton("👁", this);
-    viewBtn->setMaximumWidth(40);
-
-    QPushButton *editBtn = new QPushButton("✏️", this);
-    editBtn->setMaximumWidth(40);
-
-    QPushButton *deleteBtn = new QPushButton("🗑️", this);
-    deleteBtn->setMaximumWidth(40);
-
-    // Add buttons to layout
-    actionLayout->addWidget(viewBtn);
-    actionLayout->addWidget(editBtn);
-    actionLayout->addWidget(deleteBtn);
-    actionLayout->addStretch();
-
-    // SET THE WIDGET IN THE TABLE CELL
-    passwordTable->setCellWidget(0, 3, actionWidget);
-
-    // Connect buttons to slots WITH row information using lambda
-    int row = 0;
-    connect(viewBtn, &QPushButton::clicked, this, [this, row]() { this->onViewPassword(row); });
-    connect(editBtn, &QPushButton::clicked, this, [this, row]() { this->onEditPassword(row); });
-    connect(deleteBtn, &QPushButton::clicked, this, [this, row]() { this->onDeletePassword(row); });
-    
     mainLayout->addWidget(passwordTable);
 
     // ============ BUTTONS SECTION ============ //
@@ -135,41 +103,157 @@ void MainWindow::setupUI()
 
     // Set layout to central widget
     centralWidget->setLayout(mainLayout);
+
+    // Update Ui with information from db
+    updateUi();
+}
+
+// Update Main window interface
+void MainWindow::updateUi()
+{
+    // Clean current passwordTable
+    if (passwordTable->rowCount() > 0)
+    {
+        while (passwordTable->rowCount() > 0)
+            passwordTable->removeRow(0);
+    }
+
+    // Obtain all passwords from db
+    std::vector<Password> passwords = _db->getAllPasswords();
+
+    // Iterate for each password in the vector
+    for (const auto &pwd : passwords)
+    {
+        // New row for each iteration
+        int row = passwordTable->rowCount();
+        passwordTable->insertRow(row);
+
+        // Add all items
+        passwordTable->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(pwd.website)));
+        PrintLog(std::cout, BLUE "DEBUGING" RESET " pwd.website -> %s", pwd.website.c_str());
+        passwordTable->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(pwd.username)));
+
+        QLineEdit *pwdEdit = new QLineEdit(this);
+        pwdEdit->setText(QString::fromStdString(pwd.encrypted_password));
+        pwdEdit->setEchoMode(QLineEdit::Password); // ← Show "*"
+        pwdEdit->setReadOnly(true);
+        pwdEdit->setProperty("passwordId", pwd.id); // save ID for later
+        passwordTable->setCellWidget(row, 2, pwdEdit);
+
+        // Create all buttons action with widgets
+        QWidget *actionWidget = new QWidget(this);
+        QHBoxLayout *actionLayout = new QHBoxLayout(actionWidget);
+        actionLayout->setContentsMargins(2, 2, 2, 2);
+        actionLayout->setSpacing(5);
+
+        // Crete thre buttons for password in db: view, edit and delete
+        QPushButton *viewBtn = new QPushButton("👁", this);
+        viewBtn->setMaximumWidth(40);
+        QPushButton *editBtn = new QPushButton("✏️", this);
+        editBtn->setMaximumWidth(40);
+        QPushButton *deleteBtn = new QPushButton("🗑️", this);
+        deleteBtn->setMaximumWidth(40);
+
+        // Add buttons to layout
+        actionLayout->addWidget(viewBtn);
+        actionLayout->addWidget(editBtn);
+        actionLayout->addWidget(deleteBtn);
+        actionLayout->addStretch();
+
+        // Put widget into table
+        passwordTable->setCellWidget(row, 3, actionWidget);
+
+        // Connect butons with functions
+        connect(viewBtn, &QPushButton::clicked, this, [this, pwd]()
+                { this->onViewPassword(pwd.id); });
+        connect(editBtn, &QPushButton::clicked, this, [this, pwd]()
+                { this->onEditPassword(pwd.id); });
+        connect(deleteBtn, &QPushButton::clicked, this, [this, pwd]()
+                { this->onDeletePassword(pwd.id); });
+    }
 }
 
 // Buttons handle
 void MainWindow::onClickAddPssBttn()
 {
     PrintLog(std::cout, MAGENTA "Add Password Button" RESET " - Adding a new password...");
-    // TODO: Implementar Añadir contenido
+
+    // Create add password dialog
+    AddPasswordDialog dialog(this, _db);
+
+    // Show dialog
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        PrintLog(std::cout, GREEN "Password dialog accepted" RESET);
+        this->updateUi();
+    }
 }
 
 void MainWindow::onClickLogoutBttn()
 {
     PrintLog(std::cout, MAGENTA "Logout Button" RESET " - Loging out...");
-    // TODO: Implementar logout
+    // Confirm logout
+    QMessageBox::StandardButton reply =
+        QMessageBox::question(this, "Logout", "Are you sure you want to logout?", QMessageBox::Yes | QMessageBox::No);
+
+    // Close window
+    if (reply == QMessageBox::Yes)
+        this->close();
 }
 
-void MainWindow::onClickDeleteBttn()
+void MainWindow::onViewPassword(int id)
 {
-    PrintLog(std::cout, MAGENTA "Delete Password Button" RESET " - Handling delete password...");
-    // TODO: Implementar Delete
+    PrintLog(std::cout, MAGENTA "View Password" RESET " for ID %d", id);
+    
+    // Find the file with the id
+    for (int row = 0; row < passwordTable->rowCount(); row++)
+    {
+        QLineEdit *pwdEdit = qobject_cast<QLineEdit*>(passwordTable->cellWidget(row, 2));
+        if (pwdEdit && pwdEdit->property("passwordId").toInt() == id)
+        {
+            // Toggle between password (hidden) and normal (view)
+            if (pwdEdit->echoMode() == QLineEdit::Password)
+                pwdEdit->setEchoMode(QLineEdit::Normal);
+            else
+                pwdEdit->setEchoMode(QLineEdit::Password);
+            break;
+        }
+    }
 }
 
-void MainWindow::onViewPassword(int row)
+void MainWindow::onEditPassword(int id)
 {
-    PrintLog(std::cout, MAGENTA "View Password" RESET " for %d row", row);
-    // TODO: Implementar view Password
-}
+    PrintLog(std::cout, MAGENTA "Edit Password" RESET " for ID %d ", id);
 
-void MainWindow::onEditPassword(int row)
-{
-    PrintLog(std::cout, MAGENTA "Edit Password" RESET " for %d row", row);
-    // TODO: Implementar edit Password
+    // Get current password
+    // Password pwd;
+    // _db->getPassword(id, pwd);
+
+    // Create edit dialog with current values
+    // EditPasswordDialog dialog(this, pwd);
+
+    // If confirmed
+    // if (dialog.exec() == QDialog::Accepted) {
+    //     _db->updatePassword(id, ...);
+    //     updateUi();
+    // }
+
+    this->updateUi();
 }
 
 void MainWindow::onDeletePassword(int row)
 {
     PrintLog(std::cout, MAGENTA "Delete Password" RESET " for %d row", row);
-    // TODO: Implementar delete Password
+
+    // Confirm
+    QMessageBox::StandardButton reply = QMessageBox::question(this, "Delete Password", "Are you sure to delete password", QMessageBox::Yes | QMessageBox::No);
+
+    Password pwd;
+    if (!_db->getPassword(row, pwd))
+        QMessageBox::warning(this, "Warning", "password not found in the db");
+
+    // Delete and refresh
+    if (reply == QMessageBox::Yes)
+        _db->deletePassword(row);
+    this->updateUi();
 }

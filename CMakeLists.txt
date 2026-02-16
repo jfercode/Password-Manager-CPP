@@ -103,12 +103,15 @@ set(UI_SOURCES
     src/ui/MainWindow.cpp
     src/ui/LoginDialog.cpp
     src/ui/NewUserDialog.cpp
+    src/ui/AddPasswordDialog.cpp
 )
 
 set(UI_HEADERS
     include/MainWindow.hpp
     include/LoginDialog.hpp
     include/NewUserDialog.hpp
+    include/AddPasswordDialog.hpp
+
 )
 
 # --- Qt Designer UI Files ---
