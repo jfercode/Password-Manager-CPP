@@ -23,7 +23,8 @@ class SQLiteCipherDB
         bool createUser(
             const std::string &username,
             const std::string &passwordHash,
-            const std::string &salt) const;
+            const std::string &salt,
+            bool isMaster) const;
 
         // Get password hash by passing all data
         bool getUserHash(
@@ -33,6 +34,12 @@ class SQLiteCipherDB
 
         // Check for a user in DB
         bool userExists(const std::string &username) const;
+
+        // Check for master user (first login)
+        bool hasMasterUser() const;
+
+        // Check if username given is masterUser
+        bool isMasterUser(const std::string &username) const;
 };
 
 #endif

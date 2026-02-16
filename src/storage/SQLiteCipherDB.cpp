@@ -39,7 +39,7 @@ bool SQLiteCipherDB::findDataBasePath(void)
     if (!createDirectory(baseDir) || !createDirectory(shareDir) || !createDirectory(appDir))
         return false;
 
-    // Assign db path 
+    // Assign db path
     dbPath = appDir + "/passman.db";
     PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - DB Path: %s", dbPath.c_str());
 
@@ -54,6 +54,7 @@ void SQLiteCipherDB::setupDB(void)
                       "username TEXT UNIQUE NOT NULL,"
                       "password_hash TEXT NOT NULL,"
                       "password_salt TEXT NOT NULL,"
+                      "is_admin INTEGER DEFAULT 0,"
                       "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
 
     // Try to mount sql db
@@ -82,12 +83,13 @@ SQLiteCipherDB::~SQLiteCipherDB()
 // Insert a new user into the db
 bool SQLiteCipherDB::createUser(const std::string &username,
                                 const std::string &passwordHash,
-                                const std::string &salt) const
+                                const std::string &salt,
+                                bool isMaster) const
 {
     PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Adding new user %s...", username.c_str());
 
     // sql line
-    const char *sql = "INSERT INTO users (username, password_hash, password_salt) VALUES (?, ?, ?);";
+    const char *sql = "INSERT INTO users (username, password_hash, password_salt, is_admin) VALUES (?, ?, ?, ?);";
 
     // prepare order to db
     sqlite3_stmt *stmt = nullptr;
@@ -97,6 +99,7 @@ bool SQLiteCipherDB::createUser(const std::string &username,
     sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 2, passwordHash.c_str(), -1, SQLITE_STATIC);
     sqlite3_bind_text(stmt, 3, salt.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 4, isMaster ? 1 : 0);
 
     // Send the order to the spql
     int rSql = sqlite3_step(stmt);
@@ -191,4 +194,68 @@ bool SQLiteCipherDB::userExists(const std::string &username) const
     sqlite3_finalize(stmt); // finalize db order
     PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " -  %s user appears %d times", username.c_str(), count);
     return (count > 0);
+}
+
+// Check if username given is master user
+bool SQLiteCipherDB::isMasterUser(const std::string &username) const
+{
+    // Check for user existence
+    if (!userExists(username))
+    {
+        PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - " RED "Master %s user not found" RESET, username.c_str());
+        return (false);
+    }
+
+    // Check user count (is admin or not)
+    const char *countSql = "SELECT COUNT(*) FROM users";
+    sqlite3_stmt *countStmt = nullptr;
+    sqlite3_prepare_v2(db, countSql, -1, &countStmt, nullptr);
+    sqlite3_step(countStmt);
+    int userCount = sqlite3_column_int(countStmt, 0);
+    sqlite3_finalize(countStmt);
+
+    // Decide is_admin
+    int is_admin = (userCount == 0) ? 1 : 0;
+    if (is_admin)
+        PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " -  %s is Master user" RESET, username.c_str());
+    else
+        PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - " RED "%s is not a Master user" RESET, username.c_str());
+    return (is_admin);
+}
+
+// Check if system has any master user (for first-time initialization)
+bool SQLiteCipherDB::hasMasterUser() const
+{
+    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Checking if master user exists...");
+
+    // sql line => Check if there's any admin user
+    const char *sql = "SELECT COUNT(*) FROM users WHERE is_admin = 1";
+
+    // Prepare order to db
+    sqlite3_stmt *stmt = nullptr;
+    sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+
+    // Send the order to the sql
+    int rSql = sqlite3_step(stmt);
+    if (rSql != SQLITE_ROW)
+    {
+        sqlite3_finalize(stmt);
+        PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - " RED "Error checking for master user" RESET);
+        return false;
+    }
+
+    // Get the count of admin users
+    int adminCount = sqlite3_column_int(stmt, 0);
+    sqlite3_finalize(stmt);
+
+    if (adminCount > 0)
+    {
+        PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - " GREEN "Master user exists" RESET);
+        return true;
+    }
+    else
+    {
+        PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - " YELLOW "No master user found - system needs initialization" RESET);
+        return false;
+    }
 }

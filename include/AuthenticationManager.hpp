@@ -21,7 +21,7 @@ class AuthenticationManager
         bool    authenticateUser(const std::string &username, const std::string &password) const;
         
         //  Register a new user into the system 
-        bool    registerNewUser(const std::string &username, const std::string &password) const;
+        bool    registerNewUser(const std::string &username, const std::string &password, bool isMaster) const;
 };
 
 #endif

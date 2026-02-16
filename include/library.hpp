@@ -63,6 +63,7 @@
 
     // App classes
     #include "AuthenticationManager.hpp"
+    #include "InitializationManager.hpp"
 
     // Custom functions
     std::string ObtainCurrentTime();

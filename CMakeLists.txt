@@ -59,10 +59,12 @@ pkg_check_modules(SQLCIPHER REQUIRED sqlite3)
 
 set (APP_SOURCES
     src/app/AuthenticationManager.cpp
+    src/app/InitializationManager.cpp
 )
 
 set (APP_HEADERS
     include/AuthenticationManager.hpp
+    include/InitializationManager.hpp
 )
 
 

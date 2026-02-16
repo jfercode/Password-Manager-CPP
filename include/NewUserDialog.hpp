@@ -2,6 +2,7 @@
 #define NEWUSERDIALOG_HPP
 
 #include "library.hpp"
+#include "AuthenticationManager.hpp"
 
 class NewUserDialog : public QDialog
 {
@@ -9,11 +10,20 @@ class NewUserDialog : public QDialog
         private:
             void setupUi();
 
+            AuthenticationManager *authM;
+            QLineEdit   *userEdit;
+            QLineEdit   *passEdit;
+            QLineEdit   *verifyEdit;
+            QPushButton *loginBttn;
+            QPushButton *cancelBttn;
+
     // User event functions
     private slots:
+        void onLoginClicked();
+        void onCancelClicked();
 
     public:
-        explicit NewUserDialog(QWidget *parent = nullptr);
+        explicit NewUserDialog(QWidget* parent = nullptr, AuthenticationManager *auth = nullptr);
         ~NewUserDialog();
 };
 

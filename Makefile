@@ -58,7 +58,7 @@ NC := \033[0m # No Color
 # ============================================================================
 
 .PHONY: help docker-build docker-up docker-down docker-bash docker-clean \
-        cmake compile run setup dev clean distclean
+        cmake compile run setup dev clean distclean clean-db reset-db
 
 # ============================================================================
 # INFORMACIÓN Y AYUDA
@@ -88,6 +88,8 @@ help:
 	@echo ""
 	@echo "$(GREEN)CLEANUP COMMANDS:$(NC)"
 	@echo "  $(YELLOW)make clean$(NC)            - Limpiar build/ (artifacts)"
+	@echo "  $(YELLOW)make clean-db$(NC)         - Eliminar base de datos (reset total)"
+	@echo "  $(YELLOW)make reset-db$(NC)         - Alias para clean-db"
 	@echo "  $(YELLOW)make distclean$(NC)        - Limpiar todo (build + docker)"
 	@echo ""
 	@echo "$(GREEN)DEBUG & STATUS COMMANDS:$(NC)"
@@ -157,6 +159,18 @@ clean:
 	@echo "$(RED)🧹 Limpiando artifacts de build...$(NC)"
 	rm -rf $(BUILD_DIR)
 	@echo "$(GREEN)✓ Limpieza completa$(NC)"
+
+# ============================================================================
+# DATABASE COMMANDS
+# ============================================================================
+
+clean-db:
+	@echo "$(RED)🗑️  Eliminando base de datos...$(NC)"
+	@rm -f ~/.local/share/passman/passman.db && echo "$(GREEN)✓ Base de datos eliminada$(NC)" || echo "$(YELLOW)⚠️  Base de datos no encontrada (ya estaba limpia)$(NC)"
+
+reset-db: clean-db
+	@echo "$(GREEN)✓ Reset de base de datos completado$(NC)"
+	@echo "$(YELLOW)La aplicación creará una nueva base de datos en la próxima ejecución$(NC)"
 
 distclean: clean docker-clean
 	@echo "$(GREEN)✓ Distclean completado (proyecto limpio)$(NC)"

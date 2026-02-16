@@ -29,7 +29,7 @@ bool    AuthenticationManager::authenticateUser(const std::string &username, con
     return res;
 }
 
-bool    AuthenticationManager::registerNewUser(const std::string &username, const std::string &password) const
+bool    AuthenticationManager::registerNewUser(const std::string &username, const std::string &password, bool isMaster) const
 {
     PrintLog(std::cout, CYAN "Authentication Manager" RESET " - registing user %s...", username.c_str());
     if (db->userExists(username))
@@ -40,7 +40,7 @@ bool    AuthenticationManager::registerNewUser(const std::string &username, cons
 
     // hash the password
     auto [hash, salt] = crypto->hashPassword(password);
-    int res = db->createUser(username, hash, salt);
+    int res = db->createUser(username, hash, salt, isMaster);
     
     if (res)
         PrintLog(std::cout, CYAN "Authentication Manager" RESET " - user %s created", username.c_str());
