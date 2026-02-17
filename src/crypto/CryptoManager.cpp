@@ -74,7 +74,6 @@ std::pair<std::string, std::string> CryptoManager::hashPassword(
     const std::string &password,
     int iterations) const
 {
-
     PrintLog(std::cout, CYAN "Crypto Manager" RESET" - Hashing password...");
 
     // Generates random salt (16 bytes)

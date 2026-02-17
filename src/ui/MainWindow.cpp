@@ -113,10 +113,7 @@ void MainWindow::updateUi()
 {
     // Clean current passwordTable
     if (passwordTable->rowCount() > 0)
-    {
-        while (passwordTable->rowCount() > 0)
-            passwordTable->removeRow(0);
-    }
+        passwordTable->setRowCount(0);
 
     // Obtain all passwords from db
     std::vector<Password> passwords = _db->getAllPasswords();
@@ -130,7 +127,6 @@ void MainWindow::updateUi()
 
         // Add all items
         passwordTable->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(pwd.website)));
-        PrintLog(std::cout, BLUE "DEBUGING" RESET " pwd.website -> %s", pwd.website.c_str());
         passwordTable->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(pwd.username)));
 
         QLineEdit *pwdEdit = new QLineEdit(this);
@@ -227,7 +223,7 @@ void MainWindow::onEditPassword(int id)
 
     // Obtain db password
     Password pwd;
-    if (!_db && !_db->getPassword(id, pwd))
+    if (!_db || !_db->getPassword(id, pwd))
     {
         QMessageBox::warning(this, "Error", "Password not found");
         return;
