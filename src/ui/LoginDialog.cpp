@@ -1,6 +1,5 @@
 #include "LoginDialog.hpp"
 
-//
 LoginDialog::LoginDialog(QWidget *parent, AuthenticationManager *auth) : QDialog(parent)
 {
     // Window Title

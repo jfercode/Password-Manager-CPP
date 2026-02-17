@@ -2,9 +2,6 @@
 # define CRYPTOMANAGER_HPP
 
 #include "library.hpp"
-#include <openssl/rand.h>	// random generation
-#include <openssl/evp.h>	// PBKDF2
-#include <openssl/err.h>	// error handling
 
 class CryptoManager
 {
@@ -35,12 +32,6 @@ class CryptoManager
             const std::string &salt,
             int iterations = 10000
 		) const;
-
-		// std::string	deriveKey(
-		// 	const std::string &password,
-		// 	const std::string &salt,
-		// 	int	iterations = 10000
-		// );
 };
 
 #endif

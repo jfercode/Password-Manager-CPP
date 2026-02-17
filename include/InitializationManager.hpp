@@ -1,11 +1,9 @@
 #ifndef INITIALIZATIONMANAGER_HPP
 #define INITIALIZATIONMANAGER_HPP
 
-#include <string>
-
-// Forward declarations
-class SQLiteCipherDB;
-class AuthenticationManager;
+#include "library.hpp"
+#include "SQLiteCipherDB.hpp"
+#include "AuthenticationManager.hpp"
 
 class InitializationManager
 {

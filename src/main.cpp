@@ -1,5 +1,11 @@
 #include "library.hpp"
+#include "SQLiteCipherDB.hpp"
+#include "CryptoManager.hpp"
+#include "AuthenticationManager.hpp"
 #include "InitializationManager.hpp"
+#include "MainWindow.hpp"
+#include "LoginDialog.hpp"
+#include "NewUserDialog.hpp"
 
 // Principal main
 int main(int argc, char *argv[])

@@ -1,6 +1,4 @@
 #include "InitializationManager.hpp"
-#include "SQLiteCipherDB.hpp"
-#include "AuthenticationManager.hpp"
 
 InitializationManager::InitializationManager(const SQLiteCipherDB *database, const AuthenticationManager *auth)
     : db(database), authM(auth)

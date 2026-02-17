@@ -1,6 +1,4 @@
 #include "AuthenticationManager.hpp"
-#include "CryptoManager.hpp"
-#include "SQLiteCipherDB.hpp"
 
 AuthenticationManager::AuthenticationManager(const CryptoManager *cry, const SQLiteCipherDB *dB)
 {

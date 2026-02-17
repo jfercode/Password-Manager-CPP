@@ -1,4 +1,4 @@
-#include "../../include/MainWindow.hpp"
+#include "MainWindow.hpp"
 
 // MainWindow Constructor
 MainWindow::MainWindow(SQLiteCipherDB *db) : _db(db)
@@ -27,8 +27,8 @@ MainWindow::~MainWindow() {}
 // Sets up the full layout of this window
 void MainWindow::setupUI()
 {
-    resize(WIDTH, HEIGTH); // TODO: make widthxheight tests
-    setMinimumSize(WIDTH / 2, HEIGTH / 2);
+    resize(WIDTH, HEIGHT); // TODO: make widthxheight tests
+    setMinimumSize(WIDTH / 2, HEIGHT / 2);
 
     //  Main container (central widget)
     QWidget *centralWidget = new QWidget(this);
@@ -225,35 +225,31 @@ void MainWindow::onEditPassword(int id)
 {
     PrintLog(std::cout, MAGENTA "Edit Password" RESET " for ID %d ", id);
 
-    // Get current password
-    // Password pwd;
-    // _db->getPassword(id, pwd);
-
-    // Create edit dialog with current values
-    // EditPasswordDialog dialog(this, pwd);
-
-    // If confirmed
-    // if (dialog.exec() == QDialog::Accepted) {
-    //     _db->updatePassword(id, ...);
-    //     updateUi();
-    // }
-
-    this->updateUi();
+    // Obtain db password
+    Password pwd;
+    if (!_db && !_db->getPassword(id, pwd))
+    {
+        QMessageBox::warning(this, "Error", "Password not found");
+        return;
+    }
+    EditPasswordDialog dial(this, _db, id);
+    if (dial.exec() == QDialog::Accepted)
+        this->updateUi();
 }
 
-void MainWindow::onDeletePassword(int row)
+void MainWindow::onDeletePassword(int id)
 {
-    PrintLog(std::cout, MAGENTA "Delete Password" RESET " for %d row", row);
+    PrintLog(std::cout, MAGENTA "Delete Password" RESET " with %d ID", id);
 
     // Confirm
     QMessageBox::StandardButton reply = QMessageBox::question(this, "Delete Password", "Are you sure to delete password", QMessageBox::Yes | QMessageBox::No);
 
     Password pwd;
-    if (!_db->getPassword(row, pwd))
+    if (!_db->getPassword(id, pwd))
         QMessageBox::warning(this, "Warning", "password not found in the db");
 
     // Delete and refresh
     if (reply == QMessageBox::Yes)
-        _db->deletePassword(row);
+        _db->deletePassword(id);
     this->updateUi();
 }

@@ -57,17 +57,6 @@ pkg_check_modules(SQLCIPHER REQUIRED sqlite3)
 # SECCIÓN 3: Definir Archivos Fuente y Headers
 # ============================================================================
 
-set (APP_SOURCES
-    src/app/AuthenticationManager.cpp
-    src/app/InitializationManager.cpp
-)
-
-set (APP_HEADERS
-    include/AuthenticationManager.hpp
-    include/InitializationManager.hpp
-)
-
-
 # --- Crypto Module (Operaciones criptográficas) ---
 set(CRYPTO_SOURCES
     src/crypto/CryptoManager.cpp
@@ -77,6 +66,7 @@ set(CRYPTO_HEADERS
     include/CryptoManager.hpp
 )
 
+
 # --- Storage Module (Persistencia en BD) ---
 set(STORAGE_SOURCES
     src/storage/SQLiteCipherDB.cpp
@@ -84,6 +74,16 @@ set(STORAGE_SOURCES
 
 set(STORAGE_HEADERS
     include/SQLiteCipherDB.hpp
+)
+
+set (APP_SOURCES
+    src/app/AuthenticationManager.cpp
+    src/app/InitializationManager.cpp
+)
+
+set (APP_HEADERS
+    include/AuthenticationManager.hpp
+    include/InitializationManager.hpp
 )
 
 # --- Core Module (Lógica de aplicación) ---
@@ -104,6 +104,7 @@ set(UI_SOURCES
     src/ui/LoginDialog.cpp
     src/ui/NewUserDialog.cpp
     src/ui/AddPasswordDialog.cpp
+    src/ui/EditPasswordDialog.cpp
 )
 
 set(UI_HEADERS
@@ -111,7 +112,7 @@ set(UI_HEADERS
     include/LoginDialog.hpp
     include/NewUserDialog.hpp
     include/AddPasswordDialog.hpp
-
+    include/EditPasswordDialog.hpp
 )
 
 # --- Qt Designer UI Files ---

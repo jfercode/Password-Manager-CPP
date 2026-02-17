@@ -33,7 +33,3 @@ services:
 
     # Comando por defecto
     command: /bin/bash
-
-# Volúmenes persistentes
-# (Removido - usando bind mount directo de ./build)
-

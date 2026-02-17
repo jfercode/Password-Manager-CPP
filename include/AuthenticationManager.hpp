@@ -1,11 +1,9 @@
-#ifndef AUTHENTICATORMANAGER_HPP
-#define AUTHENTICATORMANAGER_HPP
+#ifndef AUTHMANAGER_HPP
+# define AUTHMANAGER_HPP
 
-#include <string>
-
-// Forward declarations
-class CryptoManager;
-class SQLiteCipherDB;
+#include "library.hpp"
+#include "CryptoManager.hpp"
+#include "SQLiteCipherDB.hpp"
 
 class AuthenticationManager
 {
@@ -24,4 +22,4 @@ class AuthenticationManager
         bool    registerNewUser(const std::string &username, const std::string &password, bool isMaster) const;
 };
 
-#endif
+#endif // AUTHMANAGER_HPP

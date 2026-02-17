@@ -2,7 +2,9 @@
 #define MAINWINDOW_HPP
 
 #include "library.hpp"
-class SQLiteCipherDB;
+#include "SQLiteCipherDB.hpp"
+#include "AddPasswordDialog.hpp"
+#include "EditPasswordDialog.hpp"
 
 class MainWindow : public QMainWindow
 {

@@ -1,10 +1,10 @@
-#ifndef ADDPASSDIALOG_HPP
-# define ADDPASSDIALOG_HPP
+#ifndef EDITPASSDIALOG_HPP
+# define EDITPASSDIALOG_HPP
 
 #include "library.hpp"
 #include "SQLiteCipherDB.hpp"
 
-class AddPasswordDialog : public QDialog
+class EditPasswordDialog : public QDialog
 {
     Q_OBJECT // Signals, slots and meta objects
 
@@ -12,10 +12,14 @@ class AddPasswordDialog : public QDialog
         void setupUi();
         
         SQLiteCipherDB *_db;
+        int _passwordId;
         
         QLineEdit *webEdit;
+        std::string webStr;
         QLineEdit *userEdit;
-        QLineEdit *passEdit;    
+        std::string userStr;
+        QLineEdit *passEdit;
+        std::string passStr;
 
         QPushButton *saveBttn;
         QPushButton *cancelBttn;
@@ -26,10 +30,9 @@ class AddPasswordDialog : public QDialog
         void onCancelClicked();
     
     public:
-        explicit AddPasswordDialog(QWidget* parent = nullptr, SQLiteCipherDB *db = nullptr);
+        explicit EditPasswordDialog(QWidget* parent = nullptr, SQLiteCipherDB *db = nullptr, int id = 0);
         
-        ~AddPasswordDialog();
-
+        ~EditPasswordDialog();
 };
 
 #endif

@@ -1,20 +1,7 @@
 #ifndef SQLITECIPHERDB_HPP
-#define SQLITECIPHERDB_HPP
+# define SQLITECIPHERDB_HPP
 
-// TODO: Add includes you need
-// HINT: You need SQLite3
-#include <string>
-#include <sqlite3.h>
-#include <vector>
 #include "library.hpp"
-
-// Structure to represent a stored password
-struct Password {
-    int id;
-    std::string website;
-    std::string username;
-    std::string encrypted_password;
-};
 
 class SQLiteCipherDB
 {
@@ -24,6 +11,7 @@ class SQLiteCipherDB
         
         void setupDB(void);
         bool findDataBasePath();
+
     public:
         SQLiteCipherDB();
         ~SQLiteCipherDB();
