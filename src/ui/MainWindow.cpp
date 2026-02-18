@@ -87,14 +87,10 @@ void MainWindow::setupUI()
     addBttn = new QPushButton("Add a new Password", this);
     addBttn->setMinimumWidth(150);
 
-    deleteBttn = new QPushButton("Delete Password", this);
-    deleteBttn->setMinimumWidth(150);
-
     logoutBttn = new QPushButton("Logout", this);
     logoutBttn->setMinimumWidth(150);
 
     bttnLayout->addWidget(addBttn);
-    bttnLayout->addWidget(deleteBttn);
     bttnLayout->addStretch();
     bttnLayout->addWidget(logoutBttn);
 

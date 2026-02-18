@@ -2,17 +2,13 @@
 # define AUTHMANAGER_HPP
 
 #include "library.hpp"
-#include "CryptoManager.hpp"
-#include "SQLiteCipherDB.hpp"
 
 class AuthenticationManager
 {
-    private:
-        const CryptoManager *crypto;
-        const SQLiteCipherDB *db;        
+    private:      
         
     public:
-        AuthenticationManager(const CryptoManager *cry, const SQLiteCipherDB *dB);
+        AuthenticationManager();
         ~AuthenticationManager();
 
         //  Authenticate existed user

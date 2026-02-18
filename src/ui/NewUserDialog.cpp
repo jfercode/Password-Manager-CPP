@@ -57,9 +57,6 @@ void NewUserDialog::onLoginClicked()
     QString pass = passEdit->text();
     QString passVer = verifyEdit->text();
 
-    // Minimal login // TODO: Change this in a future
-    // if (user == "admin" && pass == "1234")
-
     // verify variables
     if (user.isEmpty() || pass.isEmpty() || passVer.isEmpty())
     {
@@ -76,21 +73,15 @@ void NewUserDialog::onLoginClicked()
         return;
     }
 
-    // Get services from SessionManager
-    AuthenticationManager *authM = SESSION->getAuthenticationManager();
-    SQLiteCipherDB *db = SESSION->getDatabase();
-
     // Check for auth manager
-    if (!authM)
+    if (!SESSION->getAuthenticationManager())
     {
         QMessageBox::warning(this, "Error", "Authentication system not initialized");
         return;
     }
 
-    // TODO check for password security in a future
-
     // check if username already exists
-    if (authM->authenticateUser(user.toStdString(), pass.toStdString()))
+    if (SESSION->getAuthenticationManager()->authenticateUser(user.toStdString(), pass.toStdString()))
     {
         QMessageBox::warning(this, "Error", "User already exists");
         userEdit->clear();
@@ -98,16 +89,25 @@ void NewUserDialog::onLoginClicked()
         verifyEdit->clear();
         return;
     }
-    
+
+    // // Check for password security
+    // if (!SESSION->getCryptoManager()->validatePassword(pass.toStdString()))
+    // {
+    //     QMessageBox::warning(this, "Error", "Password not secure");
+    //     passEdit->clear();
+    //     verifyEdit->clear();
+    //     return;
+    // }
+
     // All validation completed - register user
-    if (authM->registerNewUser(user.toStdString(), pass.toStdString(), true))
+    if (SESSION->getAuthenticationManager()->registerNewUser(user.toStdString(), pass.toStdString(), true))
     {
         QMessageBox::information(this, "Success", "User registered successfully");
-        
+
         // Initialize session with new user
         std::string salt;
         std::string hash;
-        if (db && db->getUserHash(user.toStdString(), hash, salt))
+        if (SESSION->getDatabase() && SESSION->getDatabase()->getUserHash(user.toStdString(), hash, salt))
         {
             SESSION->setMasterPassword(pass.toStdString());
             SESSION->setUsername(user.toStdString());
@@ -116,7 +116,7 @@ void NewUserDialog::onLoginClicked()
 
             PrintLog(std::cout, CYAN "SessionManager" GREEN " - Session initialized for new user" RESET);
         }
-        
+
         accept();
     }
     else

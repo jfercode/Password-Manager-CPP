@@ -73,6 +73,28 @@ std::vector<unsigned char> CryptoManager::hexToBytes(const std::string &hex) con
     return bytes;
 }
 
+// Validate password security
+bool    CryptoManager::validatePassword(const std::string &password)
+{
+    bool upp, low, numb, symb, len;
+    
+    // Minimun 8 characters
+    if (password.length() < 8) len = false;
+    
+    // Validate all chars
+    for (size_t i = 0; password[i]; i++)
+    {
+        if (isupper(password[i])) upp = true;
+        if (islower(password[i])) low = true;
+        if (isdigit(password[i])) numb = true;
+        if (isgraph(password[i]) && !isalnum(password[i])) symb = true;
+    }
+    if (!upp || !low || !numb || !symb || !len)
+        PrintLog(std::cerr, RED "Crypto Manager - Insecure Password detected");
+
+    return (upp && low && numb && symb && len);
+}
+
 // Password Hashing with PBKDF2
 std::pair<std::string, std::string> CryptoManager::hashPassword(
     const std::string &password,

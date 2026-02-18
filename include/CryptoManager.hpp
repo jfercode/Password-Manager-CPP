@@ -19,6 +19,14 @@ public:
     CryptoManager();
     ~CryptoManager();
 
+    // Validate password with rules:
+    // At least 1 uppercase 
+    // At least 1 lowercase
+    // At least 1 number
+    // At least 1 symbol
+    // Minimun 8 characters
+    bool validatePassword(const std::string &password);
+
     // Password Hashing with PBKDF2
     std::pair<std::string, std::string> hashPassword(
         const std::string &password,

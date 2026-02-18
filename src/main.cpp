@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
         // Initialize all services
         SQLiteCipherDB db;
         CryptoManager crypto;
-        AuthenticationManager authM(&crypto, &db);
+        AuthenticationManager authM;
         InitializationManager init(&db, &authM);
         
         // Register services with SessionManager (central dependency injection point)

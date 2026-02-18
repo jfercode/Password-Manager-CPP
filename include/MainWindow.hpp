@@ -19,7 +19,6 @@ class MainWindow : public QMainWindow
         
         QPushButton *addBttn;
         QPushButton *refreshBttn;
-        QPushButton *deleteBttn;
         QPushButton *logoutBttn;
 
     // User event functions
