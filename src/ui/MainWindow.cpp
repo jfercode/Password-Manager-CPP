@@ -143,7 +143,7 @@ void MainWindow::updateUi()
             pwd.encrypted_password,
             pwd.iv, SESSION->getMasterPassword(),
             SESSION->getUserSalt());
-        
+ 
         QLineEdit *pwdEdit = new QLineEdit(this);
         pwdEdit->setText(QString::fromStdString(password_decrypt));
         pwdEdit->setEchoMode(QLineEdit::Password); // ← Show "*"

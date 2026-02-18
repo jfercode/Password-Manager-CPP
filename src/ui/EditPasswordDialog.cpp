@@ -32,8 +32,16 @@ EditPasswordDialog::EditPasswordDialog(QWidget *parent, int id)
                 webStr = pwd.website;
                 userEdit->setText(QString::fromStdString(pwd.username));
                 userStr = pwd.username;
-                passEdit->setText(QString::fromStdString(pwd.encrypted_password));
-                passStr = pwd.encrypted_password;
+
+                // Decrypt password before show in the ui
+                std::string password_decrypt = SESSION->getCryptoManager()->decryptPassword(
+                    pwd.encrypted_password,
+                    pwd.iv, SESSION->getMasterPassword(),
+                    SESSION->getUserSalt());
+
+                passEdit->setText(QString::fromStdString(password_decrypt));
+                passEdit->setEchoMode(QLineEdit::Password); // ← Show "*"
+                passStr = password_decrypt;
                 break;
             }
         }
@@ -117,14 +125,13 @@ void EditPasswordDialog::onSaveClicked()
     auto [ciphertext, iv] = crypto->encryptPassword(
         pass.toStdString(),
         masterPassword,
-        userSalt
-    );
+        userSalt);
 
     if (db->updatePassword(_passwordId,
-                            web.toStdString(),
-                            user.toStdString(),
-                            ciphertext,
-                            iv))
+                           web.toStdString(),
+                           user.toStdString(),
+                           ciphertext,
+                           iv))
     {
         PrintLog(std::cout, GREEN "Password edited for %s" RESET, web.toStdString().c_str());
         QMessageBox::information(this, "Success", "Password edited successfully!");
