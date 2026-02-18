@@ -3,6 +3,7 @@
 #include "CryptoManager.hpp"
 #include "AuthenticationManager.hpp"
 #include "InitializationManager.hpp"
+#include "SessionManager.hpp"
 #include "MainWindow.hpp"
 #include "LoginDialog.hpp"
 #include "NewUserDialog.hpp"
@@ -14,11 +15,14 @@ int main(int argc, char *argv[])
     
     try
     {
-        // Initialize database and authentication
+        // Initialize all services
         SQLiteCipherDB db;
         CryptoManager crypto;
         AuthenticationManager authM(&crypto, &db);
         InitializationManager init(&db, &authM);
+        
+        // Register services with SessionManager (central dependency injection point)
+        SESSION->initializeServices(&db, &crypto, &authM);
         
         // Check if system is initialized (has admin user)
         bool systemInitialized = init.isSystemInitialized();
@@ -29,13 +33,13 @@ int main(int argc, char *argv[])
         {
             // System initialized - show LoginDialog for existing users
             PrintLog(std::cout, GREEN "Showing LoginDialog for existing user" RESET);
-            authDialog = new LoginDialog(nullptr, &authM);
+            authDialog = new LoginDialog();
         }
         else
         {
             // System not initialized - show NewUserDialog to create first admin
             PrintLog(std::cout, GREEN "Showing NewUserDialog for first admin setup" RESET);
-            authDialog = new NewUserDialog(nullptr, &authM);
+            authDialog = new NewUserDialog();
         }
         
         // Execute the appropriate dialog
@@ -43,7 +47,7 @@ int main(int argc, char *argv[])
         {
             // Authentication successful - open main window
             PrintLog(std::cout, GREEN "Authentication successful! Opening MainWindow" RESET);
-            MainWindow window(&db);
+            MainWindow window;
             window.show();
             int result = app.exec();
             delete authDialog;

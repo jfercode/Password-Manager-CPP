@@ -2,7 +2,7 @@
 #define LOGINDIALOG_HPP
 
 #include "library.hpp"
-#include "AuthenticationManager.hpp"
+#include "SessionManager.hpp"
 
 class LoginDialog : public QDialog
 {
@@ -11,7 +11,6 @@ class LoginDialog : public QDialog
     private:
         void setupUi();
 
-        AuthenticationManager *authM;
         QLineEdit *userEdit;
         QLineEdit *passEdit;    
         QPushButton *loginBttn;
@@ -23,7 +22,7 @@ class LoginDialog : public QDialog
         void onCancelClicked();
     
     public:
-        explicit LoginDialog(QWidget* parent = nullptr, AuthenticationManager *auth = nullptr);
+        explicit LoginDialog(QWidget* parent = nullptr);
         
         ~LoginDialog();
 

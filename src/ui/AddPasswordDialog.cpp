@@ -1,6 +1,6 @@
 #include "AddPasswordDialog.hpp"
 
-AddPasswordDialog::AddPasswordDialog(QWidget *parent, SQLiteCipherDB *db) : QDialog(parent), _db(db)
+AddPasswordDialog::AddPasswordDialog(QWidget *parent) : QDialog(parent)
 {
     // Window Title
     setWindowTitle("Add Password Manager");
@@ -66,22 +66,36 @@ void AddPasswordDialog::onSaveClicked()
         return;
     }
 
-    // Check for authenticator manager
-    if (!_db)
+    // Get services from SessionManager
+    SQLiteCipherDB *db = SESSION->getDatabase();
+    CryptoManager *crypto = SESSION->getCryptoManager();
+
+    // Check for database and crypto
+    if (!db || !crypto)
     {
-        QMessageBox::warning(this, "Error", "Database not initialized");
+        QMessageBox::warning(this, "Error", "Database or Crypto service not initialized");
         return;
     }
-    if (_db->addPassword(web.toStdString(),
-                        user.toStdString(),
-                        pass.toStdString()))
+
+    // Get master password and salt from session
+    std::string masterPassword = SESSION->getMasterPassword();
+    std::string userSalt = SESSION->getUserSalt();
+
+    auto [ciphertext, iv] = crypto->encryptPassword(
+        pass.toStdString(),
+        masterPassword,
+        userSalt
+    );
+    
+    // Add the password to the db
+    if (db->addPassword(web.toStdString(), user.toStdString(), ciphertext, iv)) 
     {
         PrintLog(std::cout, GREEN "Password saved for %s" RESET, web.toStdString().c_str());
         QMessageBox::information(this, "Success", "Password saved successfully!");
         accept(); // Cerrar dialog
     }
     else
-        QMessageBox::warning(this, "Error", "Failed to save password");
+        QMessageBox::critical(this, "Error", "Failed to save password");
 }
 
 void AddPasswordDialog::onCancelClicked()

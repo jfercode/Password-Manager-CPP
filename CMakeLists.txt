@@ -79,11 +79,13 @@ set(STORAGE_HEADERS
 set (APP_SOURCES
     src/app/AuthenticationManager.cpp
     src/app/InitializationManager.cpp
+    src/app/SessionManager.cpp
 )
 
 set (APP_HEADERS
     include/AuthenticationManager.hpp
     include/InitializationManager.hpp
+    include/SessionManager.hpp
 )
 
 # --- Core Module (Lógica de aplicación) ---

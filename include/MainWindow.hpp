@@ -2,16 +2,16 @@
 #define MAINWINDOW_HPP
 
 #include "library.hpp"
-#include "SQLiteCipherDB.hpp"
+#include "SessionManager.hpp"
 #include "AddPasswordDialog.hpp"
 #include "EditPasswordDialog.hpp"
+
 
 class MainWindow : public QMainWindow
 {
     Q_OBJECT // Signals, slots and meta objects
 
     private:
-        SQLiteCipherDB *_db;
         QTableWidget *passwordTable;
         
         void setupUI();
@@ -32,7 +32,7 @@ class MainWindow : public QMainWindow
         void onDeletePassword(int id);
 
     public:
-        explicit MainWindow(SQLiteCipherDB *db);
+        explicit MainWindow();
         ~MainWindow();
         
         void    updateUi(void);

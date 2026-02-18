@@ -2,7 +2,6 @@
 
 Proyecto orientado a **portfolio profesional**, enfocado en C++ moderno, arquitectura limpia y fundamentos de seguridad.
 
-**Estado Actual:** 🟨 **Fase 2 - Autenticación y Seguridad Base (EN PROGRESO)**
 
 ---
 
@@ -102,7 +101,7 @@ PasswordManagerCPP/
 
 ---
 
-### 🟨 Fase 2 – Autenticación y Seguridad Base (EN PROGRESO)
+### 🟨 Fase 2 – Autenticación y Seguridad Base
 
 **Objetivos:**
 * Implementar contraseña maestra
@@ -127,7 +126,7 @@ PasswordManagerCPP/
 
 ---
 
-### 🟩 Fase 3 – Cifrado y Persistencia (Próxima)
+### 🟩 Fase 3 – Cifrado y Persistencia
 
 **Objetivos:**
 * Proteger los datos almacenados
@@ -145,7 +144,7 @@ PasswordManagerCPP/
 
 ---
 
-### 🟩 Fase 4 – Gestión de Contraseñas (Próxima)
+### 🟩 Fase 4 – Gestión de Contraseñas
 
 **Objetivos:**
 * CRUD completo de credenciales
@@ -279,7 +278,6 @@ Un proyecto que demuestre capacidad real en:
 * Containerización y DevOps básico
 * Documentación técnica clara
 
-Ideal para **portfolio junior o mid-level**.
 
 ---
 
@@ -310,7 +308,7 @@ Ideal para **portfolio junior o mid-level**.
 **Mantenedor:** jfercode  
 **Estado:** En Desarrollo Activo
 
-### 🟩 Fase 3 – Cifrado y Persistencia (Semana 3)
+### 🟩 Fase 3 – Cifrado y Persistencia
 
 **Objetivos:**
 
@@ -330,7 +328,7 @@ Ideal para **portfolio junior o mid-level**.
 
 ---
 
-### 🟩 Fase 4 – Gestión de Contraseñas (Semana 4)
+### 🟩 Fase 4 – Gestión de Contraseñas
 
 **Objetivos:**
 
@@ -349,7 +347,7 @@ Ideal para **portfolio junior o mid-level**.
 
 ---
 
-### 🟦 Fase 5 – Refactor y Calidad (Semana 5)
+### 🟦 Fase 5 – Refactor y Calidad
 
 **Objetivos:**
 
@@ -368,7 +366,7 @@ Ideal para **portfolio junior o mid-level**.
 
 ---
 
-### 🟦 Fase 6 – Extras de Portfolio (Semana 6 – Opcional)
+### 🟦 Fase 6 – Extras de Portfolio
 
 **Objetivos:**
 

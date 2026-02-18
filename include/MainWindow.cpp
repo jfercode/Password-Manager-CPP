@@ -12,7 +12,7 @@ MainWindow::MainWindow() : QMainWindow()
     PrintLog(std::cout, YELLOW "Main Window" RESET " - Initialazing UI...");
     setupUI();
 
-    // Conect bttns to functions here
+    // TODO Conect bttns to functions here
     PrintLog(std::cout, YELLOW "Main Window" RESET " - Establishing buttons connection...");
     connect(addBttn, &QPushButton::clicked, this, &MainWindow::onClickAddPssBttn);
     connect(logoutBttn, &QPushButton::clicked, this, &MainWindow::onClickLogoutBttn);
@@ -43,8 +43,7 @@ void MainWindow::setupUI()
     QHBoxLayout *headerLayout = new QHBoxLayout();
 
     // Title label
-    std::string title = "Your Passwords " + SESSION->getUsername();
-    QLabel *tittleLabel = new QLabel(title.c_str(), this);
+    QLabel *tittleLabel = new QLabel("Your Passwords", this);
     QFont tittleFont = tittleLabel->font();
     tittleFont.setPointSize(16);
     tittleFont.setBold(true);
@@ -66,8 +65,10 @@ void MainWindow::setupUI()
     passwordTable->setColumnCount(4);
     passwordTable->setHorizontalHeaderLabels({"Website", "Username", "Password", "Actions"});
     passwordTable->horizontalHeader()->setStretchLastSection(false);
-
-    passwordTable->resizeColumnsToContents();
+    passwordTable->setColumnWidth(0, 200);
+    passwordTable->setColumnWidth(1, 200);
+    passwordTable->setColumnWidth(2, 150);
+    passwordTable->setColumnWidth(3, 150);
     passwordTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     passwordTable->setSelectionMode(QAbstractItemView::SingleSelection);
     passwordTable->setAlternatingRowColors(true);
@@ -112,11 +113,9 @@ void MainWindow::updateUi()
 {
     // Get database from SessionManager
     SQLiteCipherDB *db = SESSION->getDatabase();
-    CryptoManager *crypt = SESSION->getCryptoManager();
-
-    if (!db || !crypt)
+    if (!db)
     {
-        QMessageBox::critical(this, "Error", "Some service are not available");
+        QMessageBox::critical(this, "Error", "Database service not available");
         return;
     }
 
@@ -138,14 +137,8 @@ void MainWindow::updateUi()
         passwordTable->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(pwd.website)));
         passwordTable->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(pwd.username)));
 
-        // Decrypt password before show in the ui
-        std::string password_decrypt = crypt->decryptPassword(
-            pwd.encrypted_password,
-            pwd.iv, SESSION->getMasterPassword(),
-            SESSION->getUserSalt());
-        
         QLineEdit *pwdEdit = new QLineEdit(this);
-        pwdEdit->setText(QString::fromStdString(password_decrypt));
+        pwdEdit->setText(QString::fromStdString(pwd.encrypted_password));
         pwdEdit->setEchoMode(QLineEdit::Password); // ← Show "*"
         pwdEdit->setReadOnly(true);
         pwdEdit->setProperty("passwordId", pwd.id); // save ID for later
@@ -218,11 +211,11 @@ void MainWindow::onClickLogoutBttn()
 void MainWindow::onViewPassword(int id)
 {
     PrintLog(std::cout, MAGENTA "View Password" RESET " for ID %d", id);
-
+    
     // Find the file with the id
     for (int row = 0; row < passwordTable->rowCount(); row++)
     {
-        QLineEdit *pwdEdit = qobject_cast<QLineEdit *>(passwordTable->cellWidget(row, 2));
+        QLineEdit *pwdEdit = qobject_cast<QLineEdit*>(passwordTable->cellWidget(row, 2));
         if (pwdEdit && pwdEdit->property("passwordId").toInt() == id)
         {
             // Toggle between password (hidden) and normal (view)

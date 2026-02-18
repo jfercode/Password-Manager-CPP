@@ -2,7 +2,7 @@
 #define NEWUSERDIALOG_HPP
 
 #include "library.hpp"
-#include "AuthenticationManager.hpp"
+#include "SessionManager.hpp"
 
 class NewUserDialog : public QDialog
 {
@@ -10,7 +10,6 @@ class NewUserDialog : public QDialog
         private:
             void setupUi();
 
-            AuthenticationManager *authM;
             QLineEdit   *userEdit;
             QLineEdit   *passEdit;
             QLineEdit   *verifyEdit;
@@ -23,7 +22,7 @@ class NewUserDialog : public QDialog
         void onCancelClicked();
 
     public:
-        explicit NewUserDialog(QWidget* parent = nullptr, AuthenticationManager *auth = nullptr);
+        explicit NewUserDialog(QWidget* parent = nullptr);
         ~NewUserDialog();
 };
 

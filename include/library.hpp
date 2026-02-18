@@ -48,15 +48,32 @@
 // Data structures
 struct Password
 {
-    int id;
-    std::string website;
-    std::string username;
-    std::string encrypted_password;
+    int id;                         // Unique ID in DB
+    std::string website;            // ej: "Gmail", "Facebook"
+    std::string username;           // ej: "username@example.com"
+    std::string encrypted_password; // Ciphertext in hex
+    std::string iv;                 // IV in Hexadecimal
+    std::string created_at;         // Creation timestamp
+
+    Password()
+        : id(0), website(""), username(""), encrypted_password(""), iv(""), created_at("") {}
+
+    Password(int _id, const std::string &_website,
+             const std::string &_username,
+             const std::string &_encrypted,
+             const std::string &_iv,
+             const std::string &_created)
+                : id(_id), website(_website), username(_username),
+                encrypted_password(_encrypted), iv(_iv),
+                created_at(_created) {}
 };
 
 // Utility functions
 std::string ObtainCurrentTime();
 bool createDirectory(const std::string &dirPath);
 void PrintLog(std::ostream &oss, const std::string message, ...);
+
+// SessionManager macro for easy access to the singleton instance
+#define SESSION SessionManager::getInstance()
 
 #endif

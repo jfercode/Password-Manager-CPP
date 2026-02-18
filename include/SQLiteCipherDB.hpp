@@ -42,7 +42,8 @@ class SQLiteCipherDB
         bool addPassword(
             const std::string &website,
             const std::string &username,
-            const std::string &encrypted_password) const;
+            const std::string &encrypted_password,
+            const std::string &iv) const;
 
         // Get all passwords from the database
         std::vector<Password> getAllPasswords() const;
@@ -55,7 +56,8 @@ class SQLiteCipherDB
             int id,
             const std::string &website,
             const std::string &username,
-            const std::string &encrypted_password) const;
+            const std::string &encrypted_password,
+            const std::string &iv) const;
 
         // Delete a password by ID
         bool deletePassword(int id) const;

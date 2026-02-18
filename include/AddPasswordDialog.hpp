@@ -2,7 +2,7 @@
 # define ADDPASSDIALOG_HPP
 
 #include "library.hpp"
-#include "SQLiteCipherDB.hpp"
+#include "SessionManager.hpp"
 
 class AddPasswordDialog : public QDialog
 {
@@ -10,8 +10,6 @@ class AddPasswordDialog : public QDialog
 
     private:
         void setupUi();
-        
-        SQLiteCipherDB *_db;
         
         QLineEdit *webEdit;
         QLineEdit *userEdit;
@@ -26,7 +24,7 @@ class AddPasswordDialog : public QDialog
         void onCancelClicked();
     
     public:
-        explicit AddPasswordDialog(QWidget* parent = nullptr, SQLiteCipherDB *db = nullptr);
+        explicit AddPasswordDialog(QWidget* parent = nullptr);
         
         ~AddPasswordDialog();
 

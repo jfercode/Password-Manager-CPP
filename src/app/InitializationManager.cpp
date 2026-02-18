@@ -8,7 +8,7 @@ InitializationManager::InitializationManager(const SQLiteCipherDB *database, con
 
 InitializationManager::~InitializationManager()
 {
-    PrintLog(std::cout, CYAN "InitializationManager" RESET " - Destroyed");
+    // PrintLog(std::cout, CYAN "InitializationManager" RESET " - Destroyed");
 }
 
 bool InitializationManager::isSystemInitialized() const

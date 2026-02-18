@@ -1,7 +1,7 @@
 #include "EditPasswordDialog.hpp"
 
-EditPasswordDialog::EditPasswordDialog(QWidget *parent, SQLiteCipherDB *db, int id)
-    : QDialog(parent), _db(db), _passwordId(id)
+EditPasswordDialog::EditPasswordDialog(QWidget *parent, int id)
+    : QDialog(parent), _passwordId(id)
 {
     // Window Title
     setWindowTitle("Edit Password Manager");
@@ -13,8 +13,16 @@ EditPasswordDialog::EditPasswordDialog(QWidget *parent, SQLiteCipherDB *db, int 
     // Populate fields with existing password data
     if (id)
     {
+        // Get database from SessionManager
+        SQLiteCipherDB *db = SESSION->getDatabase();
+        if (!db)
+        {
+            QMessageBox::critical(this, "Error", "Database service not available");
+            return;
+        }
+
         // Obtain all passwords from db
-        std::vector<Password> passwords = _db->getAllPasswords();
+        std::vector<Password> passwords = db->getAllPasswords();
         // Iterate for each password in the vector
         for (const auto &pwd : passwords)
         {
@@ -73,8 +81,8 @@ void EditPasswordDialog::setupUi()
 
 void EditPasswordDialog::onSaveClicked()
 {
-    QString web = webEdit->text().trimmed();
-    QString user = userEdit->text().trimmed();
+    QString web = webEdit->text();
+    QString user = userEdit->text();
     QString pass = passEdit->text();
 
     // Validate both fields filled
@@ -90,23 +98,40 @@ void EditPasswordDialog::onSaveClicked()
         QMessageBox::warning(this, "Warning", "Same password detected");
         return;
     }
-    // Check for authenticator manager
-    if (!_db)
+
+    // Get services from SessionManager
+    SQLiteCipherDB *db = SESSION->getDatabase();
+    CryptoManager *crypto = SESSION->getCryptoManager();
+
+    // Check for database and crypto
+    if (!db || !crypto)
     {
-        QMessageBox::warning(this, "Error", "Database not initialized");
+        QMessageBox::warning(this, "Error", "Database or Crypto service not initialized");
         return;
     }
-    if (_db->updatePassword(_passwordId,
+
+    // Get master password and salt from session
+    std::string masterPassword = SESSION->getMasterPassword();
+    std::string userSalt = SESSION->getUserSalt();
+
+    auto [ciphertext, iv] = crypto->encryptPassword(
+        pass.toStdString(),
+        masterPassword,
+        userSalt
+    );
+
+    if (db->updatePassword(_passwordId,
                             web.toStdString(),
                             user.toStdString(),
-                            pass.toStdString()))
+                            ciphertext,
+                            iv))
     {
         PrintLog(std::cout, GREEN "Password edited for %s" RESET, web.toStdString().c_str());
         QMessageBox::information(this, "Success", "Password edited successfully!");
-        accept(); // Cerrar dialog
+        accept();
     }
     else
-        QMessageBox::warning(this, "Error", "Failed to edit password");
+        QMessageBox::critical(this, "Error", "Failed to edit password");
 }
 
 void EditPasswordDialog::onCancelClicked()

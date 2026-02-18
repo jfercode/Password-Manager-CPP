@@ -1,6 +1,6 @@
 #include "NewUserDialog.hpp"
 
-NewUserDialog::NewUserDialog(QWidget *parent, AuthenticationManager *auth) : QDialog(parent)
+NewUserDialog::NewUserDialog(QWidget *parent) : QDialog(parent)
 {
     // Window Title
     setWindowTitle("New User Login Password Manager");
@@ -9,7 +9,6 @@ NewUserDialog::NewUserDialog(QWidget *parent, AuthenticationManager *auth) : QDi
     PrintLog(std::cout, YELLOW "New User Login Dialog" RESET " - Initialazing UI...");
     setupUi();
 
-    authM = auth;
     // Connect signal to slot
     PrintLog(std::cout, YELLOW "New User Login Dialog" RESET " - Establishing buttons connection...");
     connect(loginBttn, &QPushButton::clicked, this, &NewUserDialog::onLoginClicked);
@@ -77,10 +76,21 @@ void NewUserDialog::onLoginClicked()
         return;
     }
 
+    // Get services from SessionManager
+    AuthenticationManager *authM = SESSION->getAuthenticationManager();
+    SQLiteCipherDB *db = SESSION->getDatabase();
+
+    // Check for auth manager
+    if (!authM)
+    {
+        QMessageBox::warning(this, "Error", "Authentication system not initialized");
+        return;
+    }
+
     // TODO check for password security in a future
 
     // check if username already exists
-    if (authM && authM->authenticateUser(user.toStdString(), pass.toStdString()))
+    if (authM->authenticateUser(user.toStdString(), pass.toStdString()))
     {
         QMessageBox::warning(this, "Error", "User already exists");
         userEdit->clear();
@@ -90,9 +100,23 @@ void NewUserDialog::onLoginClicked()
     }
     
     // All validation completed - register user
-    if (authM && authM->registerNewUser(user.toStdString(), pass.toStdString(), true))
+    if (authM->registerNewUser(user.toStdString(), pass.toStdString(), true))
     {
         QMessageBox::information(this, "Success", "User registered successfully");
+        
+        // Initialize session with new user
+        std::string salt;
+        std::string hash;
+        if (db && db->getUserHash(user.toStdString(), hash, salt))
+        {
+            SESSION->setMasterPassword(pass.toStdString());
+            SESSION->setUsername(user.toStdString());
+            SESSION->setUserSalt(salt);
+            SESSION->setAuthenticated(true);
+
+            PrintLog(std::cout, CYAN "SessionManager" GREEN " - Session initialized for new user" RESET);
+        }
+        
         accept();
     }
     else

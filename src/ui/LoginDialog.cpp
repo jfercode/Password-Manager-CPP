@@ -1,6 +1,6 @@
 #include "LoginDialog.hpp"
 
-LoginDialog::LoginDialog(QWidget *parent, AuthenticationManager *auth) : QDialog(parent)
+LoginDialog::LoginDialog(QWidget *parent) : QDialog(parent)
 {
     // Window Title
     setWindowTitle("Login Password Manager");
@@ -9,7 +9,6 @@ LoginDialog::LoginDialog(QWidget *parent, AuthenticationManager *auth) : QDialog
     PrintLog(std::cout, YELLOW "Login Dialog" RESET " - Initialazing UI...");
     setupUi();
 
-    authM = auth;
     // Connect signal to slot
     PrintLog(std::cout, YELLOW "Login Dialog" RESET " - Establishing buttons connection...");
     connect(loginBttn, &QPushButton::clicked, this, &LoginDialog::onLoginClicked);
@@ -59,6 +58,10 @@ void LoginDialog::onLoginClicked()
         return;
     }
 
+    // Get services from SessionManager
+    AuthenticationManager *authM = SESSION->getAuthenticationManager();
+    SQLiteCipherDB *db = SESSION->getDatabase();
+
     // Check for authenticator manager
     if (!authM)
     {
@@ -70,6 +73,18 @@ void LoginDialog::onLoginClicked()
     if (authM->authenticateUser(user.toStdString(), pass.toStdString()))
     {
         PrintLog(std::cout, GREEN "Login successful for user: %s" RESET, user.toStdString().c_str());
+        
+        std::string salt;
+        std::string hash;
+        if (db->getUserHash(user.toStdString(), hash, salt))
+        {
+            SESSION->setMasterPassword(pass.toStdString());
+            SESSION->setUsername(user.toStdString());
+            SESSION->setUserSalt(salt);
+            SESSION->setAuthenticated(true);
+
+            PrintLog(std::cout, CYAN "SessionManager" GREEN " - Session initialized" RESET);
+        }
         accept();
     }
     else // Authentication failed
