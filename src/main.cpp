@@ -6,7 +6,6 @@
 #include "SessionManager.hpp"
 #include "MainWindow.hpp"
 #include "LoginDialog.hpp"
-#include "NewUserDialog.hpp"
 
 // Principal main
 int main(int argc, char *argv[])
@@ -27,19 +26,19 @@ int main(int argc, char *argv[])
         // Check if system is initialized (has admin user)
         bool systemInitialized = init.isSystemInitialized();
         
-        QDialog *authDialog = nullptr;
+        // Always show LoginDialog (has both Login and Register tabs)
+        LoginDialog *authDialog = new LoginDialog();
         
-        if (systemInitialized)
+        if (!systemInitialized)
         {
-            // System initialized - show LoginDialog for existing users
-            PrintLog(std::cout, GREEN "Showing LoginDialog for existing user" RESET);
-            authDialog = new LoginDialog();
+            PrintLog(std::cout, YELLOW "System not initialized - Registration required" RESET);
+            PrintLog(std::cout, GREEN "Showing LoginDialog with Register tab active" RESET);
+            authDialog->setActiveTab(1);  // Show Register tab
         }
         else
         {
-            // System not initialized - show NewUserDialog to create first admin
-            PrintLog(std::cout, GREEN "Showing NewUserDialog for first admin setup" RESET);
-            authDialog = new NewUserDialog();
+            PrintLog(std::cout, GREEN "Showing LoginDialog for existing user" RESET);
+            authDialog->setActiveTab(0);  // Show Login tab (default)
         }
         
         // Execute the appropriate dialog

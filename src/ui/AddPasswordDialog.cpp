@@ -88,7 +88,7 @@ void AddPasswordDialog::onSaveClicked()
     );
     
     // Add the password to the db
-    if (db->addPassword(web.toStdString(), user.toStdString(), ciphertext, iv)) 
+    if (db->addPassword(SESSION->getUserId(), web.toStdString(), user.toStdString(), ciphertext, iv)) 
     {
         PrintLog(std::cout, GREEN "Password saved for %s" RESET, web.toStdString().c_str());
         QMessageBox::information(this, "Success", "Password saved successfully!");

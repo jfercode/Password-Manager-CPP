@@ -58,11 +58,13 @@ void SQLiteCipherDB::setupDB(void)
                       "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP);"
                       "CREATE TABLE IF NOT EXISTS passwords("
                       "id INTEGER PRIMARY KEY AUTOINCREMENT,"
+                      "user_id INTEGER NOT NULL,"
                       "website TEXT NOT NULL,"
                       "username TEXT NOT NULL,"
                       "encrypted_password TEXT NOT NULL,"
                       "iv TEXT NOT NULL,"
-                      "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)";
+                      "created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,"
+                      "FOREIGN KEY (user_id) REFERENCES users(id))";
 
     // Try to mount sql db
     PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Executing sql...");
@@ -265,8 +267,36 @@ bool SQLiteCipherDB::hasMasterUser() const
     }
 }
 
+// Obtains the user (master) id
+int SQLiteCipherDB::getUserIdByUsername(const std::string &username) const
+{
+    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Obtaining master user [%s] ID ...", username.c_str());
+
+    const char *sql = "SELECT id FROM users WHERE username = ?";
+
+    sqlite3_stmt *stmt = nullptr;
+    sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+
+    sqlite3_bind_text(stmt, 1, username.c_str(), -1, SQLITE_STATIC);
+    int rSql = sqlite3_step(stmt);
+    if (rSql != SQLITE_ROW)
+    {
+        sqlite3_finalize(stmt);
+        PrintLog(std::cerr, CYAN "SQLiteCipherDB" RESET " - " RED "Can't find [%s] users ID" RESET, username.c_str());
+        return -1;
+    }
+    
+    int user_id = sqlite3_column_int(stmt, 0);
+    sqlite3_finalize(stmt);
+
+    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - User [%s] ID: %d", username.c_str(), user_id);
+    return user_id;
+}
+
+
 // Add a new password to the database
 bool SQLiteCipherDB::addPassword(
+    int user_id,
     const std::string &website,
     const std::string &username,
     const std::string &encrypted_password,
@@ -274,15 +304,16 @@ bool SQLiteCipherDB::addPassword(
 {
     PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Adding new password for %s...", website.c_str());
 
-    const char *sql = "INSERT INTO passwords (website, username, encrypted_password, iv) VALUES (?, ?, ?, ?);";
+    const char *sql = "INSERT INTO passwords (user_id, website, username, encrypted_password, iv) VALUES (?, ?, ?, ?, ?);";
 
     sqlite3_stmt *stmt = nullptr;
     sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
 
-    sqlite3_bind_text(stmt, 1, website.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, username.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 3, encrypted_password.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 4, iv.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_int(stmt, 1, user_id);
+    sqlite3_bind_text(stmt, 2, website.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 3, username.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 4, encrypted_password.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 5, iv.c_str(), -1, SQLITE_STATIC);
 
     int rSql = sqlite3_step(stmt);
     if (rSql != SQLITE_DONE)
@@ -328,6 +359,40 @@ std::vector<Password> SQLiteCipherDB::getAllPasswords() const
     return passwords;
 }
 
+std::vector<Password> SQLiteCipherDB::getPasswordsByUserId(int user_id) const
+{
+    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Retrieving all [%d] user id passwords...", user_id);
+
+    // Prepare sqlite order
+    std::vector<Password> pwds;
+    const char *sql = "SELECT id, website, username, encrypted_password, iv, created_at FROM passwords WHERE user_id = ?";
+
+    sqlite3_stmt *stmt = nullptr;
+    sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr);
+
+    // Bind user_id variable into the sql order
+    sqlite3_bind_int(stmt, 1, user_id);
+
+    while (sqlite3_step(stmt) == SQLITE_ROW)
+    {
+        int id = sqlite3_column_int(stmt, 0);
+        const char *website_ptr = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 1));
+        const char *user_ptr = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 2));
+        const char *pass_ptr = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 3));
+        const char *iv_ptr = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 4));
+        const char *created_ptr = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 5));
+
+        Password pwd(id, website_ptr, user_ptr, pass_ptr, iv_ptr, created_ptr);
+        pwds.push_back(pwd);
+
+        PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Password loaded: %s for user id [%d]", website_ptr, user_id);
+    }
+    sqlite3_finalize(stmt);
+
+    PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Retrieved %lu passwords for user [%d]", pwds.size(), user_id);
+    return pwds;
+}
+
 // Get a specific password by ID
 bool SQLiteCipherDB::getPassword(int id, Password &password) const
 {
@@ -366,8 +431,7 @@ bool SQLiteCipherDB::updatePassword(
     const std::string &website,
     const std::string &username,
     const std::string &encrypted_password,
-    const std::string &iv
-) const
+    const std::string &iv) const
 {
     PrintLog(std::cout, CYAN "SQLiteCipherDB" RESET " - Updating password with ID %d...", id);
 

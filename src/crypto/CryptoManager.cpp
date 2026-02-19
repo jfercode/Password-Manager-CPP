@@ -181,7 +181,7 @@ std::pair<std::string, std::string> CryptoManager::encryptPassword(const std::st
     PrintLog(std::cout, CYAN "Crypto Manager" RESET " - Encrypting password...");
     try
     {
-        //  1. Generate random IV (16 bytes)
+        //  1. Generate random IV (make bytes)
         // IV == Initialization vector
         auto iv_bytes = generateRandomBytes(16);
 

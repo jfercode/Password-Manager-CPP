@@ -39,6 +39,11 @@ SessionManager *SessionManager::getInstance()
 
 // ============ SESSION DATA MANAGEMENT ============
 
+void SessionManager::setUserId(int id)
+{
+    _user_id = id;
+}
+
 void SessionManager::setMasterPassword(const std::string &password)
 {
     _masterPassword = password;
@@ -57,6 +62,11 @@ void SessionManager::setUsername(const std::string &username)
 void SessionManager::setAuthenticated(bool authenticated)
 {
     _isAuthenticated = authenticated;
+}
+
+int SessionManager::getUserId() const
+{
+    return _user_id;
 }
 
 std::string SessionManager::getMasterPassword() const
@@ -83,6 +93,7 @@ void SessionManager::clearSession()
 {
     PrintLog(std::cout, CYAN "SessionManager" RESET " - Clearing session...");
     
+    _user_id = 0;
     _masterPassword = "";
     _userSalt = "";
     _username = "";

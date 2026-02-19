@@ -43,7 +43,7 @@ void MainWindow::setupUI()
     QHBoxLayout *headerLayout = new QHBoxLayout();
 
     // Title label
-    std::string title = "Your Passwords " + SESSION->getUsername();
+    std::string title = "Your Passwords [" + SESSION->getUsername() + "]";
     QLabel *tittleLabel = new QLabel(title.c_str(), this);
     QFont tittleFont = tittleLabel->font();
     tittleFont.setPointSize(16);
@@ -64,10 +64,16 @@ void MainWindow::setupUI()
     // ============ TABLE SECTION ============ //
     passwordTable = new QTableWidget(this);
     passwordTable->setColumnCount(4);
+    passwordTable->verticalHeader()->setDefaultSectionSize(60);
+    passwordTable->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     passwordTable->setHorizontalHeaderLabels({"Website", "Username", "Password", "Actions"});
-    passwordTable->horizontalHeader()->setStretchLastSection(false);
 
-    passwordTable->resizeColumnsToContents();
+    // Configurar el tamaño de cada columna
+    passwordTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch); // Website
+    passwordTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch); // Username
+    passwordTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch); // Password
+    passwordTable->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch); // Actions
+
     passwordTable->setSelectionBehavior(QAbstractItemView::SelectRows);
     passwordTable->setSelectionMode(QAbstractItemView::SingleSelection);
     passwordTable->setAlternatingRowColors(true);
@@ -106,6 +112,9 @@ void MainWindow::setupUI()
 // Update Main window interface
 void MainWindow::updateUi()
 {
+    // Table minimun size
+    setMinimumSize(800, 500);
+
     // Get database from SessionManager
     SQLiteCipherDB *db = SESSION->getDatabase();
     CryptoManager *crypt = SESSION->getCryptoManager();
@@ -121,7 +130,7 @@ void MainWindow::updateUi()
         passwordTable->setRowCount(0);
 
     // Obtain all passwords from db
-    std::vector<Password> passwords = db->getAllPasswords();
+    std::vector<Password> passwords = db->getPasswordsByUserId(SESSION->getUserId());
 
     // Iterate for each password in the vector
     for (const auto &pwd : passwords)
@@ -130,45 +139,47 @@ void MainWindow::updateUi()
         int row = passwordTable->rowCount();
         passwordTable->insertRow(row);
 
-        // Add all items
-        passwordTable->setItem(row, 0, new QTableWidgetItem(QString::fromStdString(pwd.website)));
-        passwordTable->setItem(row, 1, new QTableWidgetItem(QString::fromStdString(pwd.username)));
+        // WEB ITEM
+        QTableWidgetItem *webItem = new QTableWidgetItem(QString::fromStdString(pwd.website));
+        webItem->setTextAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+
+        // WEB USER ITEM
+        QTableWidgetItem *userItem = new QTableWidgetItem(QString::fromStdString(pwd.username));
+        userItem->setTextAlignment(Qt::AlignVCenter | Qt::AlignLeft);
+
+        // WEB USER PASS ITEM
+        QLineEdit *pwdEdit = new QLineEdit(this);
 
         // Decrypt password before show in the ui
         std::string password_decrypt = crypt->decryptPassword(
             pwd.encrypted_password,
             pwd.iv, SESSION->getMasterPassword(),
             SESSION->getUserSalt());
- 
-        QLineEdit *pwdEdit = new QLineEdit(this);
+
         pwdEdit->setText(QString::fromStdString(password_decrypt));
         pwdEdit->setEchoMode(QLineEdit::Password); // ← Show "*"
         pwdEdit->setReadOnly(true);
         pwdEdit->setProperty("passwordId", pwd.id); // save ID for later
-        passwordTable->setCellWidget(row, 2, pwdEdit);
+        pwdEdit->setAlignment(Qt::AlignVCenter | Qt::AlignLeft);
 
-        // Create all buttons action with widgets
+        // WEB USER PASS ACTION ITEM
         QWidget *actionWidget = new QWidget(this);
         QHBoxLayout *actionLayout = new QHBoxLayout(actionWidget);
-        actionLayout->setContentsMargins(2, 2, 2, 2);
-        actionLayout->setSpacing(5);
+        actionLayout->setContentsMargins(5, 5, 5, 5);
+        actionLayout->setSpacing(8);
+        actionLayout->setAlignment(Qt::AlignCenter);
 
-        // Crete thre buttons for password in db: view, edit and delete
+        // WEB USER PASS ACTION BUTTONS
+        // Crete three buttons for password in db: view, edit and delete
         QPushButton *viewBtn = new QPushButton("👁", this);
-        viewBtn->setMaximumWidth(40);
+        viewBtn->setMaximumWidth(38);
+        viewBtn->setMaximumHeight(38);
         QPushButton *editBtn = new QPushButton("✏️", this);
-        editBtn->setMaximumWidth(40);
+        editBtn->setMaximumWidth(38);
+        editBtn->setMaximumHeight(38);
         QPushButton *deleteBtn = new QPushButton("🗑️", this);
-        deleteBtn->setMaximumWidth(40);
-
-        // Add buttons to layout
-        actionLayout->addWidget(viewBtn);
-        actionLayout->addWidget(editBtn);
-        actionLayout->addWidget(deleteBtn);
-        actionLayout->addStretch();
-
-        // Put widget into table
-        passwordTable->setCellWidget(row, 3, actionWidget);
+        deleteBtn->setMaximumWidth(38);
+        deleteBtn->setMaximumHeight(38);
 
         // Connect butons with functions
         connect(viewBtn, &QPushButton::clicked, this, [this, pwd]()
@@ -177,6 +188,16 @@ void MainWindow::updateUi()
                 { this->onEditPassword(pwd.id); });
         connect(deleteBtn, &QPushButton::clicked, this, [this, pwd]()
                 { this->onDeletePassword(pwd.id); });
+        // Add buttons to action layout
+        actionLayout->addWidget(viewBtn);
+        actionLayout->addWidget(editBtn);
+        actionLayout->addWidget(deleteBtn);
+
+        // Put widgets into passwordTable
+        passwordTable->setItem(row, 0, webItem);
+        passwordTable->setItem(row, 1, userItem);
+        passwordTable->setCellWidget(row, 2, pwdEdit);
+        passwordTable->setCellWidget(row, 3, actionWidget);
     }
 }
 
@@ -252,7 +273,7 @@ void MainWindow::onEditPassword(int id)
     }
     EditPasswordDialog dial(this, id);
     if (dial.exec() == QDialog::Accepted)
-        this->updateUi();
+        updateUi();
 }
 
 void MainWindow::onDeletePassword(int id)

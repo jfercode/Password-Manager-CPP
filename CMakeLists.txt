@@ -104,7 +104,6 @@ set(CORE_HEADERS
 set(UI_SOURCES
     src/ui/MainWindow.cpp
     src/ui/LoginDialog.cpp
-    src/ui/NewUserDialog.cpp
     src/ui/AddPasswordDialog.cpp
     src/ui/EditPasswordDialog.cpp
 )
@@ -112,7 +111,6 @@ set(UI_SOURCES
 set(UI_HEADERS
     include/MainWindow.hpp
     include/LoginDialog.hpp
-    include/NewUserDialog.hpp
     include/AddPasswordDialog.hpp
     include/EditPasswordDialog.hpp
 )

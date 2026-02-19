@@ -31,6 +31,10 @@
 #include <QTableWidget>
 #include <QHeaderView>
 #include <QMessageBox>
+#include <QTabWidget>
+#include <QCheckBox>
+#include <QProgressBar>
+#include <QFont>
 
 // Ansi Colors and constants
 #define BLACK "\033[30m"

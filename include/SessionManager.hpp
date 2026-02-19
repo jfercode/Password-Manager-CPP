@@ -17,6 +17,7 @@ class SessionManager
         static SessionManager *_instance;
 
         // Session Data
+        int _user_id;
         std::string _masterPassword;
         std::string _userSalt;
         std::string _username;
@@ -41,12 +42,14 @@ class SessionManager
 
         // SESSION DATA MANAGEMENT
         // Setters
+        void setUserId(int id);
         void setMasterPassword(const std::string &p);
         void setUserSalt(const std::string &s);
         void setUsername(const std::string &u);
         void setAuthenticated(bool a);
 
         // Getters
+        int getUserId(void) const;
         std::string getMasterPassword(void) const;
         std::string getUserSalt(void) const;
         std::string getUsername(void) const;

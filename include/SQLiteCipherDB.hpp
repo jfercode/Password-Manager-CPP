@@ -38,8 +38,12 @@ class SQLiteCipherDB
         // Check if username given is masterUser
         bool isMasterUser(const std::string &username) const;
 
+        // Obtains the user (master) id
+        int getUserIdByUsername(const std::string &username) const;
+
         // Add a new password to the database
         bool addPassword(
+            int user_id,
             const std::string &website,
             const std::string &username,
             const std::string &encrypted_password,
@@ -47,6 +51,9 @@ class SQLiteCipherDB
 
         // Get all passwords from the database
         std::vector<Password> getAllPasswords() const;
+
+        // Get all of a user's passwords from the database 
+        std::vector<Password> getPasswordsByUserId(int user_id) const;
 
         // Get a specific password by ID
         bool getPassword(int id, Password &password) const;
